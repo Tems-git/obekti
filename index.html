@@ -319,7 +319,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
 
 <script>
 'use strict';
-const APP_VER='13';
+const APP_VER='14';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1091,7 +1091,7 @@ function openMergePreview(pkg){
  let hid=false;try{hid=localStorage.getItem('hideInstall')==='1'}catch(e){}
  if(ios&&!standalone&&!hid)$('#installHint').hidden=false;
  $('#installX').onclick=()=>{$('#installHint').hidden=true;try{localStorage.setItem('hideInstall','1')}catch(e){}};
- if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
 })();
 </script>
 </body>
