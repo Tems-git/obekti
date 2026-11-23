@@ -940,11 +940,19 @@ function openExport(){
    const t=now();const txt=await seal({created:t,by:META.author,sites:ALL,defs:DEFS},pw);
    const d=new Date(t),name=`obekti-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
    const file=new File([txt],name,{type:'application/json'});
-   if(navigator.canShare&&navigator.canShare({files:[file]})){
+   // the share menu needs a fresh tap, so the ready package gets its own buttons
+   const canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}));
+   const download=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);toast('Пакетът е свален като '+name);};
+   m.innerHTML=`<div class="msg" style="background:var(--accent-soft)">Пакетът е готов: <b>${esc(name)}</b> · ${num(Math.round(txt.length/1024))} KB</div>`;
+   const acts=p.querySelector('.actions');
+   acts.innerHTML=`<button class="btn sec" type="button" id="xDl">Свали файла</button>${canShare?`<button class="btn" type="button" id="xSh">${IC.share}Сподели</button>`:''}`;
+   p.querySelector('#xDl').onclick=()=>{download();closeSheet();};
+   const sh=p.querySelector('#xSh');
+   if(sh)sh.onclick=async()=>{
     try{await navigator.share({files:[file],title:'Обекти – пакет'});closeSheet();toast('Пакетът е споделен');}
-    catch(e){if(e.name==='AbortError'){m.innerHTML='';return;}throw e;}
-   }else{const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();
-    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);closeSheet();toast('Пакетът е свален като '+name);}
+    catch(e){if(e.name==='AbortError')return;m.innerHTML=`<div class="msg">Споделянето не стана на това устройство. Натисни „Свали файла“ и прати файла както обикновено.</div>`;sh.remove();}
+   };
   }catch(e){m.innerHTML=`<div class="msg err">Не успях да направя пакета: ${esc(e.message)}</div>`;}
  };
 }
