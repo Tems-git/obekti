@@ -306,7 +306,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
       <button type="button" id="nearx">Затвори</button>
     </div>
     <div class="banner" id="installHint" hidden>
-      <span>Първо добави приложението на началния екран (<b>Сподели</b> → <b>Добави към началния екран</b>) и импортирай данните оттам. Импортираното в Safari не се пренася в иконата.</span>
+      <span id="installTxt">Първо добави приложението на началния екран (<b>Сподели</b> → <b>Добави към началния екран</b>) и импортирай данните оттам. Импортираното в Safari не се пренася в иконата.</span>
       <button type="button" id="installX">Скрий</button>
     </div>
   </div>
@@ -319,7 +319,135 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
 
 <script>
 'use strict';
-const APP_VER='15';
+/* ====================== language (БГ / EN) ======================
+   The app is written in Bulgarian. In English mode every text that appears on screen is swapped on the fly:
+   exact phrases through EN, phrases with numbers or names through ENRX. Site data (IDs, names, addresses,
+   owners, field values) is never translated. */
+let LANG='bg';try{LANG=localStorage.getItem('lang')||(/^bg/i.test(navigator.language||'')?'bg':'en');}catch(e){}
+document.documentElement.lang=LANG;
+const LOC=()=>LANG==='en'?'en-GB':'bg-BG';
+const EN={
+'Обекти':'Sites','База и импорт':'Database and import','Номер, име, адрес…':'ID, name, address…','Търсене':'Search','Изчисти':'Clear','Филтри':'Filters',
+'Обекти до мен':'Sites near me','Собственик':'Owner','Затвори':'Close','Скрий':'Hide','Без собственик':'No owner',
+'Текст':'Text','Дълъг текст':'Long text','Телефон':'Phone','Число':'Number','Избор от списък':'Choice list','Да / Не':'Yes / No','Да':'Yes','Не':'No',
+'Действия':'Actions','Опции':'Options','Опция':'Option','избран':'selected','Наблизо':'Nearby','Копирай координатите':'Copy coordinates',
+'Първи стъпки':'Getting started','Добави обектите си':'Add your sites',
+'Търсене по номер, име и адрес, навигация до всяка станция и обектите около теб. Базата се пази само на този телефон.':'Search by ID, name and address, navigate to any site and see the sites around you. The database is kept on this phone only.',
+'Импорт на пакет':'Import package','Заключен файл от колега или от друг твой телефон':'Locked file from a colleague or another phone of yours',
+'Импорт от Excel или CSV':'Import from Excel or CSV','Таблица с номер, име, адрес и координати':'Table with ID, name, address and coordinates',
+'Добави обект ръчно':'Add a site manually','С координати или от текущото ти място':'With coordinates or from where you are',
+'Нищо не се изпраща към сървър. Данните напускат телефона само когато ти споделиш заключен пакет.':'Nothing is sent to a server. Data leaves the phone only when you share a locked package.',
+'Няма намерени обекти':'No sites found','Всички':'All','обекта':'sites','точки':'points','собственици':'owners','Базата е празна':'The database is empty',
+'Най-близки до':'Nearest to','Търся местоположението…':'Finding your location…','Телефонът не дава местоположение на това приложение.':'This phone does not share its location with this app.',
+'Няма разрешение за местоположение. Разреши го в Настройки → Safari → Местоположение.':'Location is not allowed. Allow it in Settings → Safari → Location.',
+'Не успях да определя местоположението. Опитай на открито.':'Could not get your location. Try outdoors.',
+'Изчисти всички':'Clear all','Търси в списъка…':'Search the list…','Разстояние от мен':'Distance from me','Махни':'Remove','Без ограничение':'Any distance',
+'Район':'Area','първите 3 букви на Site ID':'first 3 letters of Site ID','Населено място':'Town / village','от адреса':'from the address','няма в адреса':'not in the address','Област':'Province',
+'Попълнено':'Filled in','празно':'empty',
+'Добави колони във файла (например „Достъп“, „Тип“, „Лице за контакт“) и импортирай пак. Всяка колона става филтър тук.':'Add columns to the file (for example “Access”, “Type”, “Contact person”) and import again. Every column becomes a filter here.',
+'Моля, изчакай…':'Please wait…','База':'Database','неизвестен':'unknown','Добавяне':'Add','Добави обект':'Add site','Ръчно или от текущото място':'Manually or from where you are',
+'Само нови обекти или пълен обновен списък':'New sites only or a full updated list','Слива се с твоята база, нищо не се губи':'Merges with your database, nothing is lost',
+'Споделяне':'Share','Сподели заключен пакет':'Share locked package','Цялата база в един файл с парола':'The whole database in one password-protected file',
+'Настройки':'Settings','Полета на обектите':'Site fields','Няма допълнителни полета':'No extra fields','Твоето име (вижда се при промените)':'Your name (shown next to your changes)',
+'напр. Темелко':'e.g. Temelko','Изтрий всички данни от този телефон':'Delete all data from this phone','Данните са само на това устройство. Сървър няма.':'Data is on this device only. There is no server.',
+'Името е запазено':'Name saved','Изтриване на всички данни':'Delete all data','Напиши':'Type','ИЗТРИЙ':'DELETE',', за да потвърдиш':' to confirm','Отказ':'Cancel','Изтрий':'Delete',
+'Всички данни са изтрити':'All data deleted','Редактирай':'Edit','Покажи най-близките обекти':'Show the nearest sites','Изтрий обекта':'Delete site',
+'Изтриването се предава и с пакета':'The deletion also travels with the package','Отмени':'Undo','избери или напиши':'pick or type','Нов обект':'New site','Редакция':'Edit site',
+'Номер (Site ID)':'Site ID','Име':'Name','Адрес':'Address','Координати':'Coordinates','Тук':'Here','Можеш да поставиш координати от Google Maps или да натиснеш „Тук“.':'Paste coordinates from Google Maps or tap “Here”.',
+'Запази':'Save','Местоположението не е достъпно.':'Location is not available.','Няма разрешение за местоположение.':'Location is not allowed.','Не успях да определя местоположението.':'Could not get your location.',
+'Попълни номера на обекта.':'Enter the Site ID.','Координатите не се разпознават. Пример: 42.69123, 23.32145':'Coordinates not recognised. Example: 42.69123, 23.32145',
+'Тези полета ги има при всеки обект. Попълват се ръчно или от колони при импорт и пътуват с пакета до колегите.':'Every site has these fields. Fill them in by hand or from columns when importing; they travel to colleagues with the package.',
+'Нагоре':'Move up','Надолу':'Move down','Няма полета':'No fields','Ново поле':'New field','Поле':'Field','Име на полето':'Field name','напр. Охрана, Захранване, Етаж':'e.g. Security, Power, Floor',
+'Вид':'Type','Възможни стойности (по една на ред)':'Possible values (one per line)','Показвай като етикет на картата':'Show as a tag on the card','Иначе се вижда в „Детайли“.':'Otherwise it shows under “Details”.',
+'Отбелязвай в жълто, ако не е първата стойност':'Highlight in yellow when it is not the first value','Например достъп различен от „Свободен“.':'For example access other than “Free”.',
+'Изтрий полето':'Delete field','Напиши име на полето.':'Enter a field name.','Полето е запазено':'Field saved','Натисни пак за изтриване':'Tap again to delete',
+'Полето е изтрито. Стойностите остават в базата и се връщат, ако го създадеш отново със същото име.':'Field deleted. Its values stay in the database and come back if you create a field with the same name.',
+'Име (Site Name)':'Name (Site Name)','Адрес (Site Option Address)':'Address (Site Option Address)','Собственик (Site Owner)':'Owner (Site Owner)','Ширина (Latitude)':'Latitude',
+'Дължина (Longitude)':'Longitude','Координати в една колона':'Coordinates in one column','Опция (ако има отделна колона)':'Option (if there is a separate column)',
+'Модулът за Excel не се зареди. Отвори приложението веднъж с интернет.':'The Excel module did not load. Open the app once with internet.','Чета файла':'Reading the file',
+'Файлът не може да се прочете. Провери дали е Excel или CSV.':'The file cannot be read. Check that it is Excel or CSV.','— няма —':'— none —','Лист':'Sheet',
+'Посочи коя колона кое е. Изборът се запомня за следващите файлове със същите колони.':'Choose which column is which. The choice is remembered for files with the same columns.',
+'Преглед':'Preview','Други колони във файла':'Other columns in the file','Отметнатите стават нови полета на обектите.':'Ticked columns become new site fields.',
+'Избери колоната с номера на обекта.':'Choose the column with the Site ID.',
+'Без колона с координати: ще се обновят само обекти, които вече са в базата. Нови няма да се добавят.':'No coordinate column: only sites already in the database will be updated. No new sites will be added.',
+'Нови':'New','Променени':'Changed','Без промяна':'Unchanged','Пропуснати (нови без координати)':'Skipped (new without coordinates)','Има в базата, но липсват във файла':'In the database but missing from the file',
+'Нови полета от колоните:':'New fields from the columns:','По подразбиране остават. Изтрий ги само ако файлът е пълният актуален списък.':'They stay by default. Delete them only if the file is the full current list.',
+'Колони':'Columns','Приложи':'Apply','Това не е пакет с обекти.':'This is not a sites package.','Грешна парола.':'Wrong password.','Телефонът е твърде стар за този пакет. Обнови iOS.':'This phone is too old for this package. Update iOS.',
+'Парола':'Password','Повтори паролата':'Repeat password','Запомни паролата на този телефон':'Remember the password on this phone',
+'Попълни името си в менюто „База“, за да се вижда кой е правил промените.':'Fill in your name in the “Database” menu so others can see who made the changes.',
+'Паролата трябва да е поне 6 знака.':'The password must be at least 6 characters.','Паролите не съвпадат.':'The passwords do not match.','Заключвам…':'Locking…',
+'Пакетът е готов:':'The package is ready:','Свали файла':'Download file','Сподели':'Share','Обекти – пакет':'Sites – package','Пакетът е споделен':'Package shared',
+'Споделянето не стана на това устройство. Натисни „Свали файла“ и прати файла както обикновено.':'Sharing did not work on this device. Tap “Download file” and send the file as usual.',
+'Отключи':'Unlock','Отключвам…':'Unlocking…','Сливане с твоята база':'Merge with your database','Пакет от':'Package from','Нови за теб':'New for you',
+'Обновени (по-нова промяна в пакета)':'Updated (newer change in the package)','Изтрити от колегата':'Deleted by the colleague','Твоите по-нови промени, които остават':'Your newer changes, which stay',
+'Полета: нови или променени':'Fields: new or changed','Нищо от твоята база не се губи. При един и същ обект остава по-новата промяна. След сливането можеш да споделиш обновения пакет.':'Nothing in your database is lost. For the same site the newer change wins. After merging you can share the updated package.',
+'Слей':'Merge','Няма нищо ново':'Nothing new','Хранилището на браузъра е недостъпно':'Browser storage is unavailable','Провери дали не си в частен режим (Private) на Safari.':'Check that Safari is not in Private mode.',
+'Език':'Language','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
+};
+const ENRX=[
+ [/^Детайли · (\d+)$/,'Details · $1'],
+ [/^Покажи още (.+) · остават (.+)$/,'Show $1 more · $2 left'],
+ [/^Опитай с номер, име или улица(, или избери „Всички“)?(, или махни някой филтър)?\.$/,(m,a,b)=>'Try an ID, name or street'+(a?', or choose “All”':'')+(b?', or remove a filter':'')+'.'],
+ [/^обекта · (.+) точки · (.+)$/,'sites · $1 points · $2'],
+ [/^Най-близки до теб · точност ±(\d+) м$/,'Nearest to you · accuracy ±$1 m'],
+ [/^Покажи (.+) обекта$/,'Show $1 sites'],
+ [/^До (\d+) км от мен$/,'Within $1 km of me'],
+ [/^до (\d+) км$/,'within $1 km'],
+ [/^Район (.+)$/,'Area $1'],
+ [/^обл\. (.+)$/,'prov. $1'],
+ [/^(.+): попълнено$/,'$1: filled in'],[/^(.+): празно$/,'$1: empty'],
+ [/^Махни филтъра (.+)$/,'Remove filter $1'],
+ [/^(\d[\d\s,.]*) различни стойности$/,'$1 different values'],
+ [/^Празно \((.+)\)$/,'Empty ($1)'],
+ [/^Последна промяна: (.+?)( · последен пакет от (.+) \((.+)\))?$/,(m,a,b,c,d)=>'Last change: '+a+(b?' · last package from '+(c==='неизвестен'?'unknown':c)+' ('+d+')':'')],
+ [/^Включително (.+) отбелязани като изтрити$/,'Including $1 marked as deleted'],
+ [/^Версия (.+)$/,'Version $1'],
+ [/^Ще изтрие всички (.+) точки от този телефон\. Ако нямаш пакет, няма да можеш да ги върнеш\.$/,'This deletes all $1 points from this phone. Without a package you cannot get them back.'],
+ [/^(.*?)( · опция (\d+))? · променен (.+?)( от (.+))?$/,(m,own,o,n,d,b,by)=>own+(o?' · option '+n:'')+' · changed '+d+(b?' by '+by:'')],
+ [/^(.+) е изтрит$/,'$1 deleted'],[/^(.+) е добавен$/,'$1 added'],[/^(.+) е запазен$/,'$1 saved'],
+ [/^Взето от телефона, точност ±(\d+) м\.( Ако можеш, изчакай на открито и натисни пак\.)?$/,(m,a,b)=>'From the phone, accuracy ±'+a+' m.'+(b?' If you can, wait outdoors and tap again.':'')],
+ [/^(.+) \(опция (\d+)\) вече съществува\. Натисни „Запази“ пак, за да го замениш\.$/,'$1 (option $2) already exists. Tap “Save” again to replace it.'],
+ [/^(.+) · етикет на картата$/,(m,a)=>(EN[a]||a)+' · tag on the card'],
+ [/^Колони: (.+)$/,'Columns: $1'],[/^Импорт: (.+)$/,'Import: $1'],
+ [/^Разпознати:$/,'Recognised:'],[/^реда от (.+)\.$/,'rows of $1.'],
+ [/^Внимание: (.+)\.$/,(m,a)=>'Warning: '+trWarn(a)+'.'],
+ [/^(\d+ реда без номер са пропуснати|на \d+ реда ширината и дължината бяха разменени и ги оправих)(; .+)?\.$/,(m)=>trWarn(m.slice(0,-1))+'.'],
+ [/^Променени: (.+?)( и още (\d+))?$/,(m,a,b,c)=>'Changed: '+a+(b?' and '+c+' more':'')],
+ [/^Липсващи: (.+?)( и още (\d+))?$/,(m,a,b,c)=>'Missing: '+a+(b?' and '+c+' more':'')],
+ [/^Изтрий липсващите (.+)$/,'Delete the $1 missing'],
+ [/^Готово: (.+)$/,(m,a)=>'Done: '+trCounts(a)],[/^Слято: (.+)$/,(m,a)=>'Merged: '+trCounts(a)],
+ [/^Целият файл с (.+) точки се заключва с парола\. Без нея не може да се отвори\. Кажи паролата на колегите отделно, не в същото съобщение\.$/,'The whole file with $1 points is locked with a password and cannot be opened without it. Tell colleagues the password separately, not in the same message.'],
+ [/^Пакетът е свален като (.+)$/,'Package downloaded as $1'],[/^Не успях да направя пакета: (.+)$/,'Could not create the package: $1'],
+ [/^, направен (.+) · (.+) точки$/,', made $1 · $2 points'],
+ [/^(.+) без координати  (.*)$/,'$1 no coordinates  $2']
+];
+function trCounts(s){return s.replace(/(\d+) нови полета/g,'$1 new fields').replace(/(\d+) нови/g,'$1 new').replace(/(\d+) променени/g,'$1 changed').replace(/(\d+) обновени/g,'$1 updated').replace(/(\d+) изтрити/g,'$1 deleted');}
+function trWarn(s){return s.replace(/(\d+) реда без номер са пропуснати/g,'$1 rows without ID were skipped').replace(/(\d+) реда без номер/g,'$1 rows without ID')
+ .replace(/(\d+) реда без валидни координати \(ще обновят само вече съществуващи обекти\)/g,'$1 rows without valid coordinates (they only update existing sites)')
+ .replace(/на (\d+) реда ширината и дължината бяха разменени и ги оправих/g,'latitude and longitude were swapped on $1 rows and have been fixed').replace(/(\d+) точки са извън България/g,'$1 points are outside Bulgaria');}
+const SKIP='.nm,.ad,.note,.own,.tag,.id,.co,dd,dt,[data-raw],script,style,textarea';
+function trStr(s){const k=s.trim();if(!k||!/[А-Яа-я]/.test(k))return null;
+ let r=EN[k];
+ if(r===undefined)for(const [re,rep] of ENRX){re.lastIndex=0;if(re.test(k)){re.lastIndex=0;r=k.replace(re,rep);break;}}
+ return r===undefined?null:s.replace(k,r);}
+function trTree(root){
+ if(LANG!=='en')return;
+ if(root.nodeType===3){const el=root.parentElement;if(el&&el.closest(SKIP))return;const r=trStr(root.data);if(r!==null&&r!==root.data)root.data=r;return;}
+ if(root.nodeType!==1||root.closest(SKIP))return;
+ for(const el of [root,...root.querySelectorAll('[placeholder],[aria-label],[title]')]){
+  if(el.closest&&el.closest('.nm,.ad,.own,.tag'))continue;
+  for(const a of ['placeholder','aria-label','title']){const v=el.getAttribute&&el.getAttribute(a);if(v){const r=trStr(v);if(r!==null&&r!==v)el.setAttribute(a,r);}}}
+ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;const todo=[];
+ while((n=w.nextNode()))todo.push(n);
+ for(const x of todo){const el=x.parentElement;if(el&&el.closest(SKIP))continue;const r=trStr(x.data);if(r!==null&&r!==x.data)x.data=r;}
+}
+if(LANG==='en'){
+ document.title='Sites';
+ new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')trTree(m.target);else m.addedNodes.forEach(trTree);}})
+  .observe(document.body,{childList:true,subtree:true,characterData:true});
+}
+
+const APP_VER='16';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -330,14 +458,14 @@ const tl=s=>s.replace(/[а-я]/g,c=>TR[c]||c);
 const lz=s=>tl(norm(s)).replace(/tz|ts/g,'c').replace(/sht/g,'st').replace(/zh/g,'j').replace(/kh/g,'h').replace(/[yj]/g,'i').replace(/w/g,'v').replace(/eu/g,'ev').replace(/[^a-z0-9а-я\s]/g,'');
 const norm=s=>String(s??'').toLowerCase().replace(/ё/g,'е');
 const now=()=>Date.now();
-const fmtDate=t=>t?new Date(t).toLocaleString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
-const num=n=>Number(n).toLocaleString('bg-BG');
+const fmtDate=t=>t?new Date(t).toLocaleString(LOC(),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+const num=n=>Number(n).toLocaleString(LOC());
 const R=Math.PI/180;
 function km(a,b){const la1=a.lat*R,la2=b.lat*R,dl=(b.lon-a.lon)*R,dp=la2-la1;const h=Math.sin(dp/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dl/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(h)));}
-const fmtKm=d=>d<1?Math.round(d*100)*10+' м':(d<10?d.toFixed(1).replace('.',','):Math.round(d))+' км';
+const fmtKm=d=>LANG==='en'?(d<1?Math.round(d*100)*10+' m':(d<10?d.toFixed(1):Math.round(d))+' km'):(d<1?Math.round(d*100)*10+' м':(d<10?d.toFixed(1).replace('.',','):Math.round(d))+' км');
 function brg(a,b){const y=Math.sin((b.lon-a.lon)*R)*Math.cos(b.lat*R),x=Math.cos(a.lat*R)*Math.sin(b.lat*R)-Math.sin(a.lat*R)*Math.cos(b.lat*R)*Math.cos((b.lon-a.lon)*R);return (Math.atan2(y,x)/R+360)%360;}
 function dir(a,b){const y=Math.sin((b.lon-a.lon)*R)*Math.cos(b.lat*R),x=Math.cos(a.lat*R)*Math.sin(b.lat*R)-Math.sin(a.lat*R)*Math.cos(b.lat*R)*Math.cos((b.lon-a.lon)*R);
-  const deg=(Math.atan2(y,x)/R+360)%360;return ['С','СИ','И','ЮИ','Ю','ЮЗ','З','СЗ'][Math.round(deg/45)%8];}
+  const deg=(Math.atan2(y,x)/R+360)%360;return (LANG==='en'?['N','NE','E','SE','S','SW','W','NW']:['С','СИ','И','ЮИ','Ю','ЮЗ','З','СЗ'])[Math.round(deg/45)%8];}
 const fx=n=>String(Math.round(n*1e6)/1e6);
 const keyOf=r=>String(r.id).trim().toUpperCase()+'|'+(r.opt||1);
 const ownerOf=r=>(r.own||'').trim()||'Без собственик';
@@ -685,10 +813,12 @@ function openMenu(){
  <div class="group">
   <button class="row" type="button" data-go="fields">${IC.fields}<span>Полета на обектите<small>${liveDefs().map(d=>esc(d.name)).join(', ')||'Няма допълнителни полета'}</small></span></button>
  </div>
+ <div class="fsec"><h3>Език</h3><div class="seg" id="langSeg"><button type="button" data-lang="bg" aria-pressed="${LANG==='bg'}">Български</button><button type="button" data-lang="en" aria-pressed="${LANG==='en'}">English</button></div></div>
  <label class="f">Твоето име (вижда се при промените)<input class="inp" id="author" value="${esc(META.author)}" placeholder="напр. Темелко" autocomplete="name"></label>
  <div class="group"><button class="row danger" type="button" data-go="wipe">${IC.trash}<span>Изтрий всички данни от този телефон${dels?`<small>Включително ${num(dels)} отбелязани като изтрити</small>`:''}</span></button></div>
  <div class="lock">${IC.lock}<span>Данните са само на това устройство. Сървър няма.<br><small>Версия ${APP_VER}</small></span></div>`);
- p.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g&&!g.disabled)openSource(g.dataset.go);});
+ p.addEventListener('click',e=>{const lb=e.target.closest('[data-lang]');if(lb){if(lb.dataset.lang!==LANG){try{localStorage.setItem('lang',lb.dataset.lang)}catch(_){}location.reload();}return;}
+  const g=e.target.closest('[data-go]');if(g&&!g.disabled)openSource(g.dataset.go);});
  p.querySelector('#author').addEventListener('change',async e=>{META.author=e.target.value.trim();await idb.set('meta',META);toast('Името е запазено');});
 }
 function openSource(what){
@@ -704,7 +834,7 @@ function openWipe(){
  <label class="f">Напиши <b>ИЗТРИЙ</b>, за да потвърдиш<input class="inp" id="wipeIn" autocomplete="off"></label>
  <div class="actions"><button class="btn sec" type="button" data-close>Отказ</button><button class="btn danger" type="button" id="wipeGo" disabled>Изтрий</button></div>`);
  const i=p.querySelector('#wipeIn'),b=p.querySelector('#wipeGo');
- i.oninput=()=>b.disabled=i.value.trim().toUpperCase()!=='ИЗТРИЙ';
+ i.oninput=()=>b.disabled=i.value.trim().toUpperCase()!==(LANG==='en'?'DELETE':'ИЗТРИЙ');
  b.onclick=async()=>{ALL=[];META.lastPkg=null;META.maps={};await persist();rebuild();closeSheet();search();toast('Всички данни са изтрити');};
 }
 
@@ -743,7 +873,7 @@ function fixLatLon(lat,lon){ // Bulgaria: lat ~41–44.5, lon ~22–29
 function defInput(d,val){const v=esc(val??''),id='x_'+d.id;
  let inp;
  if(d.type==='longtext')inp=`<textarea class="inp" id="${id}">${v}</textarea>`;
- else if(d.type==='yesno')inp=`<select class="inp" id="${id}"><option value=""></option>${['Да','Не'].map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select>`;
+ else if(d.type==='yesno')inp=`<select class="inp" id="${id}"><option value=""></option>${['Да','Не'].map(o=>`<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('')}</select>`;
  else if(d.type==='choice')inp=`<input class="inp" id="${id}" list="dl_${d.id}" value="${v}" autocomplete="off" placeholder="избери или напиши"><datalist id="dl_${d.id}">${(d.opts||[]).map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`;
  else inp=`<input class="inp" id="${id}" value="${v}" autocomplete="off" ${d.type==='phone'?'type="tel" inputmode="tel"':d.type==='number'?'inputmode="decimal"':''}>`;
  return `<label class="f">${esc(d.name)}${inp}</label>`;}
@@ -1087,12 +1217,14 @@ function openMergePreview(pkg){
 (async()=>{
  try{await idb.open();ALL=(await idb.get('sites'))||[];META={...META,...((await idb.get('meta'))||{})};DEFS=(await idb.get('defs'))||DEFAULT_DEFS.map(d=>({...d}));}
  catch(e){list.innerHTML='<div class="empty"><strong>Хранилището на браузъра е недостъпно</strong><span>Провери дали не си в частен режим (Private) на Safari.</span></div>';return;}
+ trTree(document.body);
  $('#topArt').innerHTML=ILL_HERO.replace('<svg class="ill"','<svg class="ill" preserveAspectRatio="xMidYMax meet"');
  rebuild();
  try{const s=localStorage.getItem('q');if(s)q.value=s;const o=localStorage.getItem('op');if(o)opF=o;const f=JSON.parse(localStorage.getItem('flt')||'null');if(f)FLT={dist:0,reg:[],place:[],obl:[],f:{},...f,dist:0};}catch(e){}
  search();
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
  let hid=false;try{hid=localStorage.getItem('hideInstall')==='1'}catch(e){}
+ if(LANG==='en')$('#installTxt').innerHTML='First add the app to the Home Screen (<b>Share</b> → <b>Add to Home Screen</b>) and import the data from there. Data imported in Safari does not carry over to the icon.';
  if(ios&&!standalone&&!hid)$('#installHint').hidden=false;
  $('#installX').onclick=()=>{$('#installHint').hidden=true;try{localStorage.setItem('hideInstall','1')}catch(e){}};
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
