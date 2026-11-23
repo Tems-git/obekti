@@ -518,7 +518,7 @@ function openWipe(){
  <div class="actions"><button class="btn sec" type="button" data-close>Отказ</button><button class="btn danger" type="button" id="wipeGo" disabled>Изтрий</button></div>`);
  const i=p.querySelector('#wipeIn'),b=p.querySelector('#wipeGo');
  i.oninput=()=>b.disabled=i.value.trim().toUpperCase()!=='ИЗТРИЙ';
- b.onclick=async()=>{ALL=[];META.lastPkg=null;await persist();rebuild();closeSheet();search();toast('Всички данни са изтрити');};
+ b.onclick=async()=>{ALL=[];META.lastPkg=null;META.maps={};await persist();rebuild();closeSheet();search();toast('Всички данни са изтрити');};
 }
 
 /* ====================== record actions ====================== */
@@ -687,7 +687,8 @@ function prepSheet(){
  IMP.header=Array.from({length:width},(_,i)=>String(hr[i]??'').trim()||('Колона '+(i+1)));
  IMP.data=rows.slice(h+1).filter(r=>r.some(c=>String(c).trim()!==''));
  IMP.sig=IMP.header.map(norm).join('|');
- const saved=META.maps&&META.maps[IMP.sig];
+ // column choices remembered by older versions are ignored (they could put the address into „Опция“)
+ const saved=META.maps&&META.maps[IMP.sig]&&META.maps[IMP.sig].v===3?META.maps[IMP.sig]:null;
  IMP.map=saved?{...saved.map}:guess(IMP.header);
  for(const k of Object.keys(IMP.map))if(k.startsWith('x:')&&!liveDefs().some(d=>'x:'+d.id===k))delete IMP.map[k];
  // extra columns with a real header and some data become new fields automatically (map links are skipped)
@@ -785,7 +786,7 @@ function openTablePreview(){
   for(const d of IMP.pending||[]){const ex=liveDefs().find(x=>norm(x.name)===norm(d.name));
    const nd=ex||{...d,id:'f'+now().toString(36)+d.id,ord:++ord,u:t,by};if(!ex)DEFS.push(nd);ren[d.id]=nd.id;IMP.map['x:'+nd.id]=IMP.map['x:'+d.id];delete IMP.map['x:'+d.id];}
   if(Object.keys(ren).length)for(const r of [...add,...chg]){const i=idx.get(r.k);const x=ALL[i].x||{};for(const [o,n] of Object.entries(ren))if(o in x){x[n]=x[o];delete x[o];}ALL[i].x=x;}
-  META.maps=META.maps||{};META.maps[IMP.sig]={map:IMP.map};
+  META.maps=META.maps||{};META.maps[IMP.sig]={v:3,map:IMP.map};
   await persist();rebuild();closeSheet();search();
   toast(`Готово: ${add.length} нови, ${chg.length} променени${rm?`, ${rm} изтрити`:''}${nf.length?`, ${nf.length} нови полета`:''}`);IMP=null;
  };
