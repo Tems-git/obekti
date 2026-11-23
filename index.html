@@ -319,7 +319,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
 
 <script>
 'use strict';
-const APP_VER='14';
+const APP_VER='15';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -557,11 +557,13 @@ $('#nearx').onclick=()=>{stopMe();near=null;FLT.dist=0;saveFlt();search();window
 
 /* ====================== filters ====================== */
 // within one field the ticked values are OR-ed; different fields are AND-ed; everything combines with the search
-let FLT={dist:0,place:[],obl:[],f:{}};
+let FLT={dist:0,reg:[],place:[],obl:[],f:{}};
+const regOf=i=>String(L[i].id).trim().slice(0,3).toUpperCase();
 const EMPTY='\u0000';
 function saveFlt(){try{localStorage.setItem('flt',JSON.stringify(FLT))}catch(e){}}
 const xv=(i,fid)=>String((L[i].x||{})[fid]??'').trim();
 function passes(i){
+ if(FLT.reg&&FLT.reg.length&&!FLT.reg.includes(regOf(i)))return false;
  if(FLT.place.length&&!FLT.place.includes(PLACE[i]||EMPTY))return false;
  if(FLT.obl.length&&!FLT.obl.includes(OBL[i]||EMPTY))return false;
  for(const [fid,c] of Object.entries(FLT.f)){const v=xv(i,fid);
@@ -571,18 +573,19 @@ function passes(i){
  return true;}
 function activeFilters(){const a=[];const D=liveDefs();
  if(FLT.dist)a.push(['dist',`До ${FLT.dist} км от мен`]);
+ if(FLT.reg&&FLT.reg.length)a.push(['reg','Район '+FLT.reg.join(', ')]);
  if(FLT.place.length)a.push(['place',FLT.place.map(v=>v===EMPTY?'без населено място':v).join(', ')]);
  if(FLT.obl.length)a.push(['obl','обл. '+FLT.obl.map(v=>v===EMPTY?'—':v).join(', ')]);
  for(const [fid,c] of Object.entries(FLT.f)){const d=D.find(x=>x.id===fid);if(!d){delete FLT.f[fid];continue;}
   if(c.mode==='filled')a.push(['f:'+fid,`${d.name}: попълнено`]);else if(c.mode==='empty')a.push(['f:'+fid,`${d.name}: празно`]);
   else if(c.vals&&c.vals.length)a.push(['f:'+fid,`${d.name}: ${c.vals.map(v=>v===EMPTY?'празно':v).join(', ')}`]);}
  return a;}
-function clearFilter(k){if(k==='dist')FLT.dist=0;else if(k==='place')FLT.place=[];else if(k==='obl')FLT.obl=[];else delete FLT.f[k.slice(2)];saveFlt();}
+function clearFilter(k){if(k==='dist')FLT.dist=0;else if(k==='reg')FLT.reg=[];else if(k==='place')FLT.place=[];else if(k==='obl')FLT.obl=[];else delete FLT.f[k.slice(2)];saveFlt();}
 function renderPills(){const a=activeFilters(),box=$('#fPills'),b=$('#fBadge');
  b.hidden=!a.length;b.textContent=a.length;box.hidden=!a.length;
  box.innerHTML=a.map(([k,txt])=>`<button class="pill" type="button" data-fk="${esc(k)}" aria-label="Махни филтъра ${esc(txt)}"><span>${esc(txt)}</span>${IC.x}</button>`).join('')+(a.length>1?'<button class="pill clear" type="button" data-fk="*">Изчисти всички</button>':'');}
 $('#fPills').addEventListener('click',e=>{const p=e.target.closest('[data-fk]');if(!p)return;
- if(p.dataset.fk==='*'){FLT={dist:0,place:[],obl:[],f:{}};saveFlt();}else clearFilter(p.dataset.fk);search();});
+ if(p.dataset.fk==='*'){FLT={dist:0,reg:[],place:[],obl:[],f:{}};saveFlt();}else clearFilter(p.dataset.fk);search();});
 // how many sites have each value (a site counts once even with several options)
 function facet(get){const c=new Map();G.forEach(pts=>{const s=new Set(pts.map(i=>get(i)||EMPTY));s.forEach(v=>c.set(v,(c.get(v)||0)+1));});
  return [...c.entries()].sort((a,b)=>(a[0]===EMPTY)-(b[0]===EMPTY)||b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),'bg'));}
@@ -592,10 +595,11 @@ function vlist(key,entries,selected,emptyLabel){
 $('#fBtn').onclick=openFilters;
 function openFilters(){
  const D=liveDefs();
- const pl=facet(i=>PLACE[i]),ob=facet(i=>OBL[i]);
+ const pl=facet(i=>PLACE[i]),ob=facet(i=>OBL[i]),rg=facet(i=>regOf(i)).sort((a,b)=>a[0].localeCompare(b[0]));
  let h=`<div class="fsec"><h3>Разстояние от мен${FLT.dist?'<button type="button" data-clr="dist">Махни</button>':''}</h3>
   <div class="seg" data-seg="dist">${[0,1,5,10,25,50].map(d=>`<button type="button" data-v="${d}" aria-pressed="${FLT.dist===d}">${d?'до '+d+' км':'Без ограничение'}</button>`).join('')}</div>
   ${FLT.dist&&!me?'<p class="sub">Търся местоположението…</p>':''}</div>`;
+ if(rg.length>1)h+=`<div class="fsec"><h3>Район <small>първите 3 букви на Site ID</small>${FLT.reg.length?'<button type="button" data-clr="reg">Махни</button>':''}</h3>${vlist('reg',rg,FLT.reg,'')}</div>`;
  if(pl.filter(([v])=>v!==EMPTY).length>1)h+=`<div class="fsec"><h3>Населено място <small>от адреса</small>${FLT.place.length?'<button type="button" data-clr="place">Махни</button>':''}</h3>${vlist('place',pl,FLT.place,'няма в адреса')}</div>`;
  if(ob.filter(([v])=>v!==EMPTY).length>1)h+=`<div class="fsec"><h3>Област <small>от адреса</small>${FLT.obl.length?'<button type="button" data-clr="obl">Махни</button>':''}</h3>${vlist('obl',ob,FLT.obl,'няма в адреса')}</div>`;
  for(const d of D){const f=facet(i=>xv(i,d.id)),filled=f.filter(([v])=>v!==EMPTY);const c=FLT.f[d.id]||{};
@@ -611,7 +615,7 @@ function openFilters(){
  const upd=()=>{search();p.querySelector('#fShow').textContent=`Покажи ${num(res.length)} обекта`;};upd();
  p.addEventListener('change',e=>{const cb=e.target.closest('input[type=checkbox][data-k]');if(!cb)return;
   const k=cb.dataset.k,vals=[...p.querySelectorAll(`input[data-k="${CSS.escape(k)}"]:checked`)].map(x=>x.value);
-  if(k==='place')FLT.place=vals;else if(k==='obl')FLT.obl=vals;else{const fid=k.slice(2);if(vals.length)FLT.f[fid]={vals};else delete FLT.f[fid];}
+  if(k==='reg')FLT.reg=vals;else if(k==='place')FLT.place=vals;else if(k==='obl')FLT.obl=vals;else{const fid=k.slice(2);if(vals.length)FLT.f[fid]={vals};else delete FLT.f[fid];}
   saveFlt();upd();});
  p.addEventListener('input',e=>{const s=e.target.closest('[data-vf]');if(!s)return;const qq=norm(s.value.trim()),ql=tl(qq);
   p.querySelectorAll(`[data-vl="${CSS.escape(s.dataset.vf)}"] label`).forEach(l=>{l.hidden=!!qq&&!l.dataset.lbl.includes(qq)&&!l.dataset.lbl.includes(ql);});});
@@ -622,7 +626,7 @@ function openFilters(){
    else{const fid=k.slice(2);if(v)FLT.f[fid]={mode:v};else delete FLT.f[fid];}
    sb.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===sb));saveFlt();upd();return;}
   const cl=e.target.closest('[data-clr]');if(cl){clearFilter(cl.dataset.clr);openFilters();return;}
-  if(e.target.closest('#fClear')){FLT={dist:0,place:[],obl:[],f:{}};saveFlt();openFilters();return;}
+  if(e.target.closest('#fClear')){FLT={dist:0,reg:[],place:[],obl:[],f:{}};saveFlt();openFilters();return;}
   if(e.target.closest('#fShow')){closeSheet();window.scrollTo(0,0);}
  });
 }
@@ -1085,7 +1089,7 @@ function openMergePreview(pkg){
  catch(e){list.innerHTML='<div class="empty"><strong>Хранилището на браузъра е недостъпно</strong><span>Провери дали не си в частен режим (Private) на Safari.</span></div>';return;}
  $('#topArt').innerHTML=ILL_HERO.replace('<svg class="ill"','<svg class="ill" preserveAspectRatio="xMidYMax meet"');
  rebuild();
- try{const s=localStorage.getItem('q');if(s)q.value=s;const o=localStorage.getItem('op');if(o)opF=o;const f=JSON.parse(localStorage.getItem('flt')||'null');if(f)FLT={dist:0,place:[],obl:[],f:{},...f,dist:0};}catch(e){}
+ try{const s=localStorage.getItem('q');if(s)q.value=s;const o=localStorage.getItem('op');if(o)opF=o;const f=JSON.parse(localStorage.getItem('flt')||'null');if(f)FLT={dist:0,reg:[],place:[],obl:[],f:{},...f,dist:0};}catch(e){}
  search();
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
  let hid=false;try{hid=localStorage.getItem('hideInstall')==='1'}catch(e){}
