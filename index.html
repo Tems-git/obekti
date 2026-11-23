@@ -99,6 +99,26 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 .nearbar b{font-family:var(--mono);font-weight:600}
 .nearbar button{margin-left:auto;flex:none;border:0;background:var(--surface);color:var(--fg);font:600 13px var(--sans);padding:7px 10px;border-radius:8px;cursor:pointer}
 .nearbar.err{background:var(--warn-soft)}
+.nearbar button.mapbtn{margin-left:auto;background:var(--accent);color:var(--accent-ink)}
+.nearbar button.mapbtn+button{margin-left:0}
+.nearbar.err .mapbtn{display:none}
+.mapview{position:fixed;inset:0;z-index:25;background:var(--bg);display:flex;flex-direction:column}
+.mapbar{display:flex;align-items:center;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:10px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.mtitle{font-size:14px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtitle b{color:var(--fg)}
+#map{flex:1;min-height:0;background:var(--surface-2)}
+@media (prefers-color-scheme:dark){#map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}}
+.leaflet-container{font:13px/1.4 var(--sans)}
+.leaflet-popup-content{margin:12px 14px;min-width:200px}
+.pp b.pid{font:600 13px var(--mono);background:var(--fg);color:var(--surface);padding:3px 6px;border-radius:6px;margin-right:6px}
+.pp .pn{font-weight:600;font-size:14.5px}
+.pp .pa{color:#5d6874;font-size:12.5px;margin:4px 0}
+.pp .pd{font:600 12px var(--mono);color:#0a6e78;margin:2px 0 8px}
+.pp .pb{display:flex;gap:6px}
+.pp .pb a{flex:1;text-align:center;text-decoration:none;font-weight:600;font-size:13px;padding:8px 6px;border-radius:8px}
+.pp .pb a.g{background:#0a6e78;color:#fff}.pp .pb a.w{background:#e2f2f8;color:#0b7fa8}
+.medot{width:18px;height:18px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35),0 2px 6px rgba(0,0,0,.3)}
+.origdot{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 40%,transparent),0 2px 6px rgba(0,0,0,.3)}
 .nearbar.live svg{animation:ping 1.8s ease-out infinite}
 @keyframes ping{0%{transform:scale(.85);opacity:.6}50%{transform:scale(1.08);opacity:1}100%{transform:scale(.85);opacity:.6}}
 @keyframes wv{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
@@ -312,6 +332,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
     <div class="nearbar" id="nearbar" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg>
       <span class="txt" id="neartxt"></span>
+      <button type="button" id="nearMap" class="mapbtn">Карта</button>
       <button type="button" id="nearx">Затвори</button>
     </div>
     <div class="banner" id="installHint" hidden>
@@ -321,6 +342,10 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
   </div>
 </header>
 <main><div class="wrap" id="list"></div></main>
+<div class="mapview" id="mapView" hidden>
+  <div class="mapbar"><button class="btn sec small" type="button" id="mapBack">Списък</button><span class="mtitle" id="mapTitle"></span></div>
+  <div id="map"></div>
+</div>
 <div class="sheet" id="sheet" hidden></div>
 <div class="toast" id="toast" role="status" hidden></div>
 <input type="file" id="fileTable" accept=".xlsx,.xls,.csv,.txt,.ods" hidden>
@@ -391,7 +416,7 @@ const EN={
 'Обновени (по-нова промяна в пакета)':'Updated (newer change in the package)','Изтрити от колегата':'Deleted by the colleague','Твоите по-нови промени, които остават':'Your newer changes, which stay',
 'Полета: нови или променени':'Fields: new or changed','Нищо от твоята база не се губи. При един и същ обект остава по-новата промяна. След сливането можеш да споделиш обновения пакет.':'Nothing in your database is lost. For the same site the newer change wins. After merging you can share the updated package.',
 'Слей':'Merge','Няма нищо ново':'Nothing new','Хранилището на браузъра е недостъпно':'Browser storage is unavailable','Провери дали не си в частен режим (Private) на Safari.':'Check that Safari is not in Private mode.',
-'Език':'Language','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
+'Език':'Language','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
 };
 const ENRX=[
  [/^Детайли · (\d+)$/,'Details · $1'],
@@ -401,6 +426,7 @@ const ENRX=[
  [/^обекта · (.+) точки$/,'sites · $1 points'],[/^от ([\d\s.,]+)$/,'of $1'],[/^Обновена (.+)$/,'Updated $1'],
  [/^Най-близки до теб · точност ±(\d+) м$/,'Nearest to you · accuracy ±$1 m'],
  [/^Покажи (.+) обекта$/,'Show $1 sites'],
+ [/^Най-близки до теб · $/,'Nearest to you · '],
  [/^До (\d+) км от мен$/,'Within $1 km of me'],
  [/^до (\d+) км$/,'within $1 km'],
  [/^Район (.+)$/,'Area $1'],
@@ -457,7 +483,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='19';
+const APP_VER='20';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -686,13 +712,53 @@ function startMe(keepQuery){
  let last=null;
  watchId=navigator.geolocation.watchPosition(p=>{
   me={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};geoErr='';
-  if(!last||km(last,me)>0.03){last={...me};search();const fs=$('#fShow');if(fs)fs.textContent=`Покажи ${num(res.length)} обекта`;}else{updateNearbar();}
+  if(!last||km(last,me)>0.03){last={...me};search();drawMap(false);const fs=$('#fShow');if(fs)fs.textContent=`Покажи ${num(res.length)} обекта`;}else{updateNearbar();}
  },e=>{geoErr=e.code===1?'Няма разрешение за местоположение. Разреши го в Настройки → Safari → Местоположение.':'Не успях да определя местоположението. Опитай на открито.';updateNearbar();},
  {enableHighAccuracy:true,maximumAge:5000,timeout:20000});
 }
 function stopMe(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}}
 meBtn.onclick=()=>{if(near&&near.type==='me'){stopMe();near=null;FLT.dist=0;saveFlt();search();}else{startMe();}};
-$('#nearx').onclick=()=>{stopMe();near=null;FLT.dist=0;saveFlt();search();window.scrollTo(0,0)};
+$('#nearx').onclick=()=>{closeMap();stopMe();near=null;FLT.dist=0;saveFlt();search();window.scrollTo(0,0)};
+
+/* ====================== map of the nearby sites ======================
+   Map tiles come from OpenStreetMap; the site markers are drawn on the phone and are not sent anywhere. */
+let MAP=null,mapLayer=null,LF=null;
+function loadLeaflet(){if(window.L&&window.L.map){LF=window.L;return Promise.resolve();}
+ return new Promise((res,rej)=>{const c=document.createElement('link');c.rel='stylesheet';c.href='vendor/leaflet/leaflet.css';document.head.appendChild(c);
+  const s=document.createElement('script');s.src='vendor/leaflet/leaflet.js';s.onload=()=>{LF=window.L;res();};s.onerror=()=>rej(new Error('Картата не се зареди. Отвори приложението веднъж с интернет.'));document.head.appendChild(s);});}
+const mapOpen=()=>!$('#mapView').hidden;
+async function openMap(){
+ if(!near)return;
+ try{await loadLeaflet();}catch(e){toast(e.message);return;}
+ $('#mapView').hidden=false;document.body.style.overflow='hidden';
+ if(!MAP){MAP=LF.map('map',{zoomControl:true});
+  LF.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(MAP);
+  mapLayer=LF.layerGroup().addTo(MAP);}
+ setTimeout(()=>{MAP.invalidateSize();drawMap(true);},30);
+}
+function closeMap(){$('#mapView').hidden=true;document.body.style.overflow='';}
+function popupHtml(r,o){const ll=fx(r.lat)+','+fx(r.lon);const [ad]=r.addr?splitAddr(r.addr):[''];
+ return `<div class="pp"><div><b class="pid">${esc(r.id)}</b><span class="pn">${esc(r.name||'')}</span></div>${ad?`<div class="pa">${esc(ad)}</div>`:''}`+
+  (o?`<div class="pd">${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</div>`:'')+
+  `<div class="pb"><a class="g" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">Google Maps</a><a class="w" href="https://waze.com/ul?ll=${ll}&z=17" target="_blank" rel="noopener">Waze</a></div></div>`;}
+function drawMap(fit){
+ if(!MAP||!mapOpen())return;
+ mapLayer.clearLayers();const o=origin();const cs=getComputedStyle(document.documentElement);
+ const items=res.slice(0,150).map(it=>L[sel.get(it.g)??it.best]);
+ for(const r of items.slice().reverse()){
+  const isO=near&&near.type==='site'&&r.k===near.k;
+  const col=cs.getPropertyValue('--'+(OPCLS.get(ownerOf(r))||'p5')).trim()||'#4f6475';
+  const m=isO?LF.marker([r.lat,r.lon],{icon:LF.divIcon({className:'',html:'<div class="origdot"></div>',iconSize:[22,22],iconAnchor:[11,11]}),zIndexOffset:1000})
+            :LF.circleMarker([r.lat,r.lon],{radius:8,color:'#fff',weight:2,fillColor:col,fillOpacity:1});
+  m.bindPopup(popupHtml(r,o)).addTo(mapLayer);
+ }
+ if(near.type==='me'&&me){LF.circle([me.lat,me.lon],{radius:me.acc,color:'#1a73e8',weight:1,fillColor:'#1a73e8',fillOpacity:.1,interactive:false}).addTo(mapLayer);
+  LF.marker([me.lat,me.lon],{icon:LF.divIcon({className:'',html:'<div class="medot"></div>',iconSize:[18,18],iconAnchor:[9,9]}),zIndexOffset:2000,interactive:false}).addTo(mapLayer);}
+ $('#mapTitle').innerHTML=near.type==='me'?`Най-близки до теб · <b>${num(items.length)}</b>`:`Най-близки до <b>${esc(near.id)}</b> · ${num(items.length)}`;
+ if(fit){const pts=[];if(o)pts.push([o.lat,o.lon]);items.slice(0,12).forEach(r=>pts.push([r.lat,r.lon]));
+  if(pts.length>1)MAP.fitBounds(pts,{padding:[40,40],maxZoom:16});else if(pts.length)MAP.setView(pts[0],14);}
+}
+$('#nearMap').onclick=openMap;$('#mapBack').onclick=closeMap;
 
 /* ====================== filters ====================== */
 // within one field the ticked values are OR-ed; different fields are AND-ed; everything combines with the search
