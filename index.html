@@ -319,7 +319,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
 
 <script>
 'use strict';
-const APP_VER='12';
+const APP_VER='13';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -436,7 +436,7 @@ function card(k){
    (o?(isOrigin?'<span class="dist origin">избран</span>':`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+
    (isOrigin?'':`<button class="nb" type="button" data-near="${esc(r.k)}">${IC.near}Наблизо</button>`)+`</div>`;
  h+=`<div class="b"><a class="gm" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">${IC.map}Google Maps</a>`+
-   `<a class="wz" href="https://waze.com/ul?q=${encodeURIComponent(fx(r.lat)+', '+fx(r.lon))}&z=17" target="_blank" rel="noopener">${IC.nav}Waze</a>`+
+   `<a class="wz" href="https://waze.com/ul?ll=${ll}&z=17" target="_blank" rel="noopener">${IC.nav}Waze</a>`+
    `<button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите">${IC.cp}</button></div></article>`;
  return h;
 }
