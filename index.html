@@ -225,7 +225,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
       </button>
     </div>
-    <div class="chips" id="chips" role="group" aria-label="Оператор"></div>
+    <div class="chips" id="chips" role="group" aria-label="Собственик"></div>
     <div class="nearbar" id="nearbar" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg>
       <span class="txt" id="neartxt"></span>
@@ -251,6 +251,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const TR={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sht',ъ:'a',ь:'y',ю:'yu',я:'ya'};
 const tl=s=>s.replace(/[а-я]/g,c=>TR[c]||c);
+// loose Latin form: tolerant to c/ts, j/zh, y/i, kh/h spellings
+const lz=s=>tl(norm(s)).replace(/tz|ts/g,'c').replace(/sht/g,'st').replace(/zh/g,'j').replace(/kh/g,'h').replace(/[yj]/g,'i').replace(/w/g,'v').replace(/eu/g,'ev').replace(/[^a-z0-9а-я\s]/g,'');
 const norm=s=>String(s??'').toLowerCase().replace(/ё/g,'е');
 const now=()=>Date.now();
 const fmtDate=t=>t?new Date(t).toLocaleString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
@@ -261,7 +263,8 @@ const fmtKm=d=>d<1?Math.round(d*100)*10+' м':(d<10?d.toFixed(1).replace('.',','
 function dir(a,b){const y=Math.sin((b.lon-a.lon)*R)*Math.cos(b.lat*R),x=Math.cos(a.lat*R)*Math.sin(b.lat*R)-Math.sin(a.lat*R)*Math.cos(b.lat*R)*Math.cos((b.lon-a.lon)*R);
   const deg=(Math.atan2(y,x)/R+360)%360;return ['С','СИ','И','ЮИ','Ю','ЮЗ','З','СЗ'][Math.round(deg/45)%8];}
 const fx=n=>String(Math.round(n*1e6)/1e6);
-const keyOf=r=>norm(r.op).trim()+'|'+String(r.id).trim().toUpperCase()+'|'+(r.opt||1);
+const keyOf=r=>String(r.id).trim().toUpperCase()+'|'+(r.opt||1);
+const ownerOf=r=>(r.own||'').trim()||'Без собственик';
 
 const IC={
  map:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
@@ -293,12 +296,6 @@ let ALL=[];                       // every record, deleted ones kept as markers 
 let META={author:'',maps:{},pw:'',lastPkg:null,changed:0};
 /* extra fields per site: definitions travel inside packages, values live in rec.x */
 const DEFAULT_DEFS=[
- {id:'type',name:'Тип на обекта',type:'choice',opts:['Кула','Мачта на покрив','Покрив','Стълб','Вътрешно покритие','Контейнер / шкаф','Друго'],badge:1},
- {id:'access',name:'Достъп',type:'choice',opts:['Свободен','С ключ','Със заявка','С придружител','Специален пропуск'],badge:1,warn:1},
- {id:'contact',name:'Лице за контакт',type:'text'},
- {id:'phone',name:'Телефон',type:'phone'},
- {id:'keys',name:'Ключ / код',type:'text'},
- {id:'accessNote',name:'Бележки за достъпа',type:'longtext'}
 ].map((d,i)=>({opts:[],badge:0,warn:0,...d,ord:i,u:0,by:'',del:0}));
 const TYPES={text:'Текст',longtext:'Дълъг текст',phone:'Телефон',number:'Число',choice:'Избор от списък',yesno:'Да / Не'};
 let DEFS=[];
@@ -312,15 +309,15 @@ let L=[],IDX=[],G=[],OPS=[],KEYI=new Map(),OPCLS=new Map();
 function rebuild(){
  L=ALL.filter(r=>!r.del);
  KEYI=new Map(L.map((r,i)=>[r.k,i]));
- IDX=L.map(r=>{const base=norm([r.id,r.name,r.addr,r.op,r.own,...Object.values(r.x||{})].join(' '));return base+' '+tl(base)+' '+String(r.id).replace(/\D/g,'').replace(/^0+/,'');});
+ IDX=L.map(r=>{const base=norm([r.id,r.name,r.addr,r.own,...Object.values(r.x||{})].join(' '));return base+' '+tl(base)+' '+lz(base)+' '+String(r.id).replace(/\D/g,'').replace(/^0+/,'');});
  const gi=new Map();G=[];
- L.forEach((r,i)=>{const k=norm(r.op)+'|'+String(r.id).toUpperCase();let g=gi.get(k);if(g===undefined){g=G.length;gi.set(k,g);G.push([]);}G[g].push(i);});
+ L.forEach((r,i)=>{const k=String(r.id).toUpperCase();let g=gi.get(k);if(g===undefined){g=G.length;gi.set(k,g);G.push([]);}G[g].push(i);});
  G.forEach(p=>p.sort((a,b)=>(L[a].opt||1)-(L[b].opt||1)));
  G.sort((a,b)=>String(L[a[0]].id).localeCompare(String(L[b[0]].id),'bg',{numeric:true}));
- const cnt=new Map();G.forEach(p=>{const o=L[p[0]].op;cnt.set(o,(cnt.get(o)||0)+1)});
+ const cnt=new Map();G.forEach(p=>{const o=ownerOf(L[p[0]]);cnt.set(o,(cnt.get(o)||0)+1)});
  OPS=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(([o])=>o);
  OPCLS=new Map();let n=1;
- OPS.forEach(o=>{OPCLS.set(o,/^a1\b/i.test(o)?'p0':'p'+(n>5?5:n++));});
+ OPS.forEach(o=>{OPCLS.set(o,/^a1\b/i.test(o)?'p0':o==='Без собственик'?'p5':'p'+(n>4?4:n++));});
 }
 
 /* ====================== address ====================== */
@@ -354,7 +351,7 @@ function card(k){
    return `<span class="tag${w?' warn':''}" title="${esc(d.name)}">${w?IC.key:''}${hl(d.type==='yesno'?d.name+': '+xs[d.id]:xs[d.id])}</span>`;}).join('')}</div>`;
  const det=LD.filter(d=>!d.badge&&has(d));
  if(det.length)h+=`<details class="det"><summary>Детайли · ${det.length}</summary><dl>${det.map(d=>`<dt>${esc(d.name)}</dt><dd>${fmtVal(d,xs[d.id])}</dd>`).join('')}</dl></details>`;
- h+=`<div class="meta"><span class="own ${OPCLS.get(r.op)||'p5'}">${esc(r.op)}</span>${r.own&&norm(r.own)!==norm(r.op)?`<span class="own sub">${esc(r.own)}</span>`:''}<span class="co">${ll}</span>`+
+ h+=`<div class="meta">${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}<span class="co">${ll}</span>`+
    (o?(isOrigin?'<span class="dist origin">избран</span>':`<span class="dist">${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+
    (isOrigin?'':`<button class="nb" type="button" data-near="${esc(r.k)}">${IC.near}Наблизо</button>`)+`</div>`;
  h+=`<div class="b"><a class="gm" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">${IC.map}Google Maps</a>`+
@@ -383,14 +380,14 @@ function render(more){
  const old=$('#more');if(old)old.remove();
  list.insertAdjacentHTML('beforeend',h);shown=end;
  if(shown<res.length)list.insertAdjacentHTML('beforeend',`<button id="more" class="more" type="button">Покажи още ${Math.min(PAGE,res.length-shown)} · остават ${num(res.length-shown)}</button>`);
- if(!res.length)list.innerHTML='<div class="empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8.5 11h5"/></svg><strong>Няма намерени обекти</strong><span>Опитай с номер, име или улица'+(opF!=='all'?', или избери „Всички“ оператори':'')+'.</span></div>';
+ if(!res.length)list.innerHTML='<div class="empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8.5 11h5"/></svg><strong>Няма намерени обекти</strong><span>Опитай с номер, име или улица'+(opF!=='all'?', или избери „Всички“':'')+'.</span></div>';
 }
 function search(){
  const terms=norm(q.value.trim()).split(/\s+/).filter(Boolean);
  clr.hidden=!q.value;curTerms=terms;sel.clear();
  let tt=null,score=null;
  if(terms.length){
-  tt=terms.map(t=>{const n=t.replace(/^[a-z]{2,4}(?=\d)/,'').replace(/^0+(?=\d)/,'');return [t,tl(t),/^\d+$/.test(n)?n:null];});
+  tt=terms.map(t=>{const n=t.replace(/^[a-z]{2,4}(?=\d)/,'').replace(/^0+(?=\d)/,'');return [t,tl(t),/^\d+$/.test(n)?n:null,lz(t)];});
   score=i=>{const r=L[i],nm=norm(r.name),nml=nm+' '+tl(nm),nr=String(r.id).replace(/\D/g,'').replace(/^0+/,''),idn=norm(r.id);let s=0;
    for(const [a,b,n] of tt){
     if(idn===a)s+=1500;
@@ -404,9 +401,9 @@ function search(){
  if(opF!=='all'&&!OPS.includes(opF))opF='all';
  const o=origin();const cnt=new Map();res=[];let total=0;
  G.forEach((pts,g)=>{
-  const m=tt?pts.filter(i=>tt.every(([a,b])=>IDX[i].includes(a)||IDX[i].includes(b))):pts;
+  const m=tt?pts.filter(i=>tt.every(([a,b,,c])=>IDX[i].includes(a)||IDX[i].includes(b)||(c&&IDX[i].includes(c)))):pts;
   if(!m.length)return;
-  total++;const op=L[pts[0]].op;cnt.set(op,(cnt.get(op)||0)+1);
+  total++;const op=ownerOf(L[pts[0]]);cnt.set(op,(cnt.get(op)||0)+1);
   if(opF!=='all'&&op!==opF)return;
   let best=m[0],bs=-1,bd=Infinity;
   if(o){for(const i of m){const d=km(o,L[i]);if(d<bd){bd=d;best=i;}}}
@@ -485,7 +482,7 @@ $('#menuBtn').onclick=openMenu;
 function openMenu(){
  const ops=OPS.length;const dels=ALL.length-L.length;
  const p=sheet('База',`
- <div class="stats"><div class="stat"><b>${num(G.length)}</b><span>обекта</span></div><div class="stat"><b>${num(L.length)}</b><span>точки</span></div><div class="stat"><b>${ops}</b><span>оператора</span></div></div>
+ <div class="stats"><div class="stat"><b>${num(G.length)}</b><span>обекта</span></div><div class="stat"><b>${num(L.length)}</b><span>точки</span></div><div class="stat"><b>${ops}</b><span>собственици</span></div></div>
  <p class="sub">Последна промяна: ${fmtDate(META.changed)}${META.lastPkg?` · последен пакет от ${esc(META.lastPkg.by||'неизвестен')} (${fmtDate(META.lastPkg.created)})`:''}</p>
  <div class="gl">Добавяне</div>
  <div class="group">
@@ -527,7 +524,7 @@ function openWipe(){
 /* ====================== record actions ====================== */
 function openActions(k){
  const r=L[KEYI.get(k)];if(!r)return;
- const p=sheet(`${r.id} ${r.name||''}`,`<p class="sub">${esc(r.op)}${r.opt?` · опция ${r.opt}`:''} · променен ${fmtDate(r.u)}${r.by?' от '+esc(r.by):''}</p>
+ const p=sheet(`${r.id} ${r.name||''}`,`<p class="sub">${esc(r.own||'')}${r.opt?` · опция ${r.opt}`:''} · променен ${fmtDate(r.u)}${r.by?' от '+esc(r.by):''}</p>
  <div class="group">
   <button class="row" type="button" data-a="edit">${IC.edit}<span>Редактирай</span></button>
   <button class="row" type="button" data-a="near">${IC.near}<span>Покажи най-близките обекти</span></button>
@@ -564,15 +561,14 @@ function defInput(d,val){const v=esc(val??''),id='x_'+d.id;
  else inp=`<input class="inp" id="${id}" value="${v}" autocomplete="off" ${d.type==='phone'?'type="tel" inputmode="tel"':d.type==='number'?'inputmode="decimal"':''}>`;
  return `<label class="f">${esc(d.name)}${inp}</label>`;}
 function openEdit(r){
- const isNew=!r;const v=r||{op:opF!=='all'?opF:(OPS[0]||''),id:'',name:'',addr:'',own:'',opt:'',lat:'',lon:''};
+ const isNew=!r;const v=r||{own:opF!=='all'&&opF!=='Без собственик'?opF:'',id:'',name:'',addr:'',own:'',opt:'',lat:'',lon:''};
  const p=sheet(isNew?'Нов обект':'Редакция',`
- <datalist id="opsList">${OPS.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
- <div class="grid2"><label class="f">Оператор <em>*</em><input class="inp" id="eOp" list="opsList" value="${esc(v.op)}" autocomplete="off"></label>
- <label class="f">Номер <em>*</em><input class="inp" id="eId" value="${esc(v.id)}" autocapitalize="characters" autocomplete="off"></label></div>
- <div class="grid2"><label class="f">Име<input class="inp" id="eName" value="${esc(v.name)}" autocomplete="off"></label>
+ <datalist id="opsList">${OPS.filter(o=>o!=='Без собственик').map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+ <div class="grid2"><label class="f">Номер (Site ID) <em>*</em><input class="inp" id="eId" value="${esc(v.id)}" autocapitalize="characters" autocomplete="off"></label>
  <label class="f">Опция<input class="inp" id="eOpt" inputmode="numeric" value="${esc(v.opt||'')}" placeholder="1"></label></div>
+ <label class="f">Име<input class="inp" id="eName" value="${esc(v.name)}" autocomplete="off"></label>
  <label class="f">Адрес<input class="inp" id="eAddr" value="${esc(v.addr)}" autocomplete="off"></label>
- <label class="f">Собственик на кулата<input class="inp" id="eOwn" list="opsList" value="${esc(v.own)}" autocomplete="off"></label>
+ <label class="f">Собственик<input class="inp" id="eOwn" list="opsList" value="${esc(v.own)}" autocomplete="off"></label>
  ${liveDefs().map(d=>defInput(d,(v.x||{})[d.id])).join('')}
  <label class="f">Координати <em>*</em>
   <div class="inrow"><input class="inp" id="eLL" value="${v.lat!==''?esc(fx(v.lat)+', '+fx(v.lon)):''}" placeholder="42.69123, 23.32145" inputmode="text" autocomplete="off">
@@ -589,15 +585,15 @@ function openEdit(r){
  };
  p.querySelector('#eSave').onclick=async()=>{
   const g=id=>p.querySelector(id).value.trim();
-  const rec={op:g('#eOp'),id:g('#eId'),name:g('#eName'),addr:g('#eAddr'),own:g('#eOwn'),opt:parseInt(g('#eOpt'),10)||null};
-  if(!rec.op||!rec.id){msg.className='msg err';msg.textContent='Попълни оператор и номер.';return;}
+  const rec={id:g('#eId'),name:g('#eName'),addr:g('#eAddr'),own:g('#eOwn'),opt:parseInt(g('#eOpt'),10)||null};
+  if(!rec.id){msg.className='msg err';msg.textContent='Попълни номера на обекта.';return;}
   const pr=parsePair(g('#eLL'));if(!pr){msg.className='msg err';msg.textContent='Координатите не се разпознават. Пример: 42.69123, 23.32145';return;}
   [rec.lat,rec.lon]=fixLatLon(pr[0],pr[1]);
   rec.x={...((r&&r.x)||{})};
   for(const d of liveDefs()){const el=p.querySelector('#x_'+d.id);if(!el)continue;const val=el.value.trim();if(val)rec.x[d.id]=val;else delete rec.x[d.id];}
   rec.k=keyOf(rec);rec.u=now();rec.by=META.author;rec.del=0;
   const exist=ALL.findIndex(x=>x.k===rec.k);
-  if(exist>=0&&!ALL[exist].del&&(isNew||rec.k!==r.k)&&!overwriteOk){msg.className='msg';msg.textContent=`${rec.id} (${rec.op}, опция ${rec.opt||1}) вече съществува. Натисни „Запази“ пак, за да го замениш.`;overwriteOk=true;return;}
+  if(exist>=0&&!ALL[exist].del&&(isNew||rec.k!==r.k)&&!overwriteOk){msg.className='msg';msg.textContent=`${rec.id} (опция ${rec.opt||1}) вече съществува. Натисни „Запази“ пак, за да го замениш.`;overwriteOk=true;return;}
   if(!isNew&&rec.k!==r.k){const oi=ALL.findIndex(x=>x.k===r.k);if(oi>=0)ALL[oi]={...ALL[oi],del:1,u:now(),by:META.author};}
   if(exist>=0)ALL[exist]=rec;else ALL.push(rec);
   await persist();rebuild();closeSheet();search();toast(isNew?`${rec.id} е добавен`:`${rec.id} е запазен`);
@@ -651,19 +647,19 @@ function openDef(d){
 }
 
 /* ====================== import from Excel / CSV ====================== */
-const FIELDS=[['id','Номер на обекта',1],['name','Име'],['addr','Адрес'],['op','Оператор'],['own','Собственик на кулата'],['lat','Ширина (lat)'],['lon','Дължина (lon)'],['coords','Координати в една колона'],['opt','Опция']];
+const FIELDS=[['id','Номер (Site ID)',1],['name','Име (Site Name)'],['addr','Адрес (Site Option Address)'],['own','Собственик (Site Owner)'],['lat','Ширина (Latitude)'],['lon','Дължина (Longitude)'],['coords','Координати в една колона'],['opt','Опция (ако има отделна колона)']];
 const GUESS=[['id',/^(site\s*)?(id|код|номер|№|site\s*code|sitecode|site_id|обект)$|site.?id|номер\s*на\s*обект/i],
  ['lat',/^(lat|latitude|географска\s*ширина|ширина|n|y)\b/i],['lon',/^(lon|lng|long|longitude|географска\s*дължина|дължина|e|x)\b/i],
- ['coords',/координат|coord|gps/i],['opt',/опция|option|вариант|candidate/i],['op',/оператор|operator/i],
- ['own',/собств|owner|tower|кула/i],['addr',/адрес|address|местоп|location/i],['name',/name|име|наименование/i]];
-const XGUESS={type:/^(тип(\s+на\s+обекта)?|вид\s+обект|type|site\s*type)$/i,access:/^((вид|тип)\s+)?достъп$|^access$/i,contact:/контакт|contact|лице/i,
- phone:/телефон|phone|^тел\.?$|gsm/i,keys:/ключ|код|key/i,accessNote:/бележк|забележ|note|коментар/i};
+ ['coords',/координат|coord|gps/i],['own',/собств|owner|tower|кула|оператор|operator/i],['addr',/адрес|address|местоп|location/i],
+ ['name',/name|име|наименование/i],['opt',/^(опция|option|вариант|candidate)(\s*(no\.?|№|#|номер))?$/i]];
+const IGNORE_COL=/see\s*it\s*on\s*the\s*map|^map$|карта|^link|линк|url|hyperlink/i;
 function guess(h){const m={};const used=new Set();
- const G2=[...GUESS,...liveDefs().map(d=>['x:'+d.id,XGUESS[d.id]||new RegExp('^'+reEsc(d.name.trim())+'$','i')])];
+ const G2=[...GUESS,...liveDefs().map(d=>['x:'+d.id,new RegExp('^'+reEsc(d.name.trim())+'$','i')])];
  for(const [f,re] of G2)for(let i=0;i<h.length;i++){if(used.has(i)||m[f]!==undefined)continue;if(re.test(String(h[i]).trim())){m[f]=i;used.add(i);}}
  if(m.lat!==undefined&&m.lon!==undefined)delete m.coords;return m;}
 let IMP=null;
 function loadXLSX(){return window.XLSX?Promise.resolve():new Promise((res,rej)=>{const s=document.createElement('script');s.src='vendor/xlsx.full.min.js';s.onload=res;s.onerror=()=>rej(new Error('Модулът за Excel не се зареди. Отвори приложението веднъж с интернет.'));document.head.appendChild(s);});}
+const hasCoordsMap=()=>(IMP.map.lat!==undefined&&IMP.map.lon!==undefined)||IMP.map.coords!==undefined;
 $('#fileTable').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;
  busy('Чета файла');
  try{await loadXLSX();
@@ -672,9 +668,18 @@ $('#fileTable').addEventListener('change',async e=>{const f=e.target.files[0];if
    if((txt.match(/�/g)||[]).length>3){try{txt=new TextDecoder('windows-1251').decode(buf);}catch(_){}}
    wb=XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true});}
   else wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
-  IMP={name:f.name,wb,sheet:wb.SheetNames[0],mode:'add',newCols:new Set()};prepSheet();openMapping();
+  IMP={name:f.name,wb,sheet:wb.SheetNames[0]};prepSheet();
+  // known layout: straight to the preview; otherwise ask which column is which
+  if(IMP.map.id!==undefined&&hasCoordsMap()){IMP.parsed=parseRows();openTablePreview();}else openMapping();
  }catch(err){closeSheet();toast(err.message&&err.message.startsWith('Модулът')?err.message:'Файлът не може да се прочете. Провери дали е Excel или CSV.');}
 });
+function freeCols(){const used=new Set(Object.entries(IMP.map).filter(([k])=>!k.startsWith('x:new')).map(([,v])=>v));
+ return IMP.header.map((h,i)=>[h,i]).filter(([h,i])=>!used.has(i));}
+function syncPending(){
+ for(const k of Object.keys(IMP.map))if(k.startsWith('x:new'))delete IMP.map[k];
+ IMP.pending=[...IMP.newCols].map(i=>({id:'new'+i,name:IMP.header[i],type:'text',opts:[],badge:0,warn:0,ord:0,u:0,by:'',del:0}));
+ IMP.pending.forEach(d=>IMP.map['x:'+d.id]=+d.id.slice(3));
+}
 function prepSheet(){
  const rows=XLSX.utils.sheet_to_json(IMP.wb.Sheets[IMP.sheet],{header:1,defval:'',raw:true,blankrows:false});
  let h=rows.findIndex(r=>r.filter(c=>String(c).trim()!=='').length>=2);if(h<0)h=0;
@@ -683,9 +688,11 @@ function prepSheet(){
  IMP.data=rows.slice(h+1).filter(r=>r.some(c=>String(c).trim()!==''));
  IMP.sig=IMP.header.map(norm).join('|');
  const saved=META.maps&&META.maps[IMP.sig];
- IMP.map=saved?{...saved.map}:guess(IMP.header);IMP.fixedOp=saved?saved.fixedOp||'':'';
+ IMP.map=saved?{...saved.map}:guess(IMP.header);
  for(const k of Object.keys(IMP.map))if(k.startsWith('x:')&&!liveDefs().some(d=>'x:'+d.id===k))delete IMP.map[k];
- IMP.newCols=new Set();
+ // extra columns with a real header and some data become new fields automatically (map links are skipped)
+ IMP.newCols=new Set(saved?[]:freeCols().filter(([h,i])=>!/^Колона \d+$/.test(h)&&!IGNORE_COL.test(h)&&IMP.data.some(r=>String(r[i]??'').trim()!=='')).map(([,i])=>i));
+ syncPending();
 }
 function parseRows(){
  const m=IMP.map,recs=[],skipped={noid:0,nocoord:0},seen=new Map();let swapped=0,outside=0;
@@ -698,11 +705,10 @@ function parseRows(){
   const hasC=isFinite(lat)&&isFinite(lon)&&!(lat===0&&lon===0);
   if(hasC){let sw;[lat,lon,sw]=fixLatLon(lat,lon);if(sw)swapped++;if(lat<40.8||lat>44.5||lon<21.8||lon>29)outside++;}
   else skipped.nocoord++;
-  const op=String((m.op!==undefined?cell(row,'op'):'')||IMP.fixedOp||'').trim()||'Без оператор';
   let opt=parseInt(cell(row,'opt'),10);
-  const gk=norm(op)+'|'+id.toUpperCase();
+  const gk=id.toUpperCase();
   if(!opt){const n=(seen.get(gk)||0)+1;seen.set(gk,n);opt=n>1?n:null;}
-  const rec={op,id,opt:opt||null,x:{}};if(hasC){rec.lat=Math.round(lat*1e6)/1e6;rec.lon=Math.round(lon*1e6)/1e6;}
+  const rec={id,opt:opt||null,x:{}};if(hasC){rec.lat=Math.round(lat*1e6)/1e6;rec.lon=Math.round(lon*1e6)/1e6;}
   for(const f of ['name','addr','own']){const v=String(cell(row,f)??'').trim();if(v)rec[f]=v;}
   for(const k of Object.keys(m)){if(!k.startsWith('x:'))continue;let v=String(row[m[k]]??'').trim();if(!v)continue;
    const d=DEFS.find(x=>'x:'+x.id===k)||(IMP.pending||[]).find(x=>'x:'+x.id===k);
@@ -710,53 +716,45 @@ function parseRows(){
    rec.x[k.slice(2)]=v;}
   rec.k=keyOf(rec);recs.push(rec);
  }
- // a site listed twice without option numbers: first row becomes option 1
- const byG=new Map();recs.forEach(r=>{const gk=norm(r.op)+'|'+r.id.toUpperCase();if(!byG.has(gk))byG.set(gk,[]);byG.get(gk).push(r);});
+ // the same Site ID on several rows = several options; the first row becomes option 1
+ const byG=new Map();recs.forEach(r=>{const gk=r.id.toUpperCase();if(!byG.has(gk))byG.set(gk,[]);byG.get(gk).push(r);});
  byG.forEach(a=>{if(a.length>1)a.forEach(r=>{if(!r.opt){r.opt=1;r.k=keyOf(r);}});});
  const uniq=new Map();recs.forEach(r=>uniq.set(r.k,r));
  return {recs:[...uniq.values()],skipped,swapped,outside};
 }
 function openMapping(){
  const sel=f=>`<select class="inp" data-f="${f}"><option value="">— няма —</option>${IMP.header.map((h,i)=>`<option value="${i}" ${IMP.map[f]===i?'selected':''}>${esc(h)}${IMP.data[0]&&String(IMP.data[0][i]??'').trim()?' · '+esc(String(IMP.data[0][i]).slice(0,24)):''}</option>`).join('')}</select>`;
- const p=sheet('Импорт: '+IMP.name,`
+ const p=sheet('Колони: '+IMP.name,`
  ${IMP.wb.SheetNames.length>1?`<label class="f">Лист<select class="inp" id="mSheet">${IMP.wb.SheetNames.map(s=>`<option ${s===IMP.sheet?'selected':''}>${esc(s)}</option>`).join('')}</select></label>`:''}
- <div class="radio">
-  <label><input type="radio" name="mode" value="add" ${IMP.mode==='add'?'checked':''}><span>Само нови или променени обекти<small>Добавя и обновява. Нищо не изтрива.</small></span></label>
-  <label><input type="radio" name="mode" value="full" ${IMP.mode==='full'?'checked':''}><span>Пълен обновен списък<small>Освен това показва кои обекти липсват във файла и ти решаваш дали да ги махнеш.</small></span></label>
- </div>
- <div class="gl">Колони</div>
- ${[...FIELDS,...liveDefs().map(d=>['x:'+d.id,d.name])].map(([f,lbl,req])=>f==='op'?`<label class="f">${lbl}${sel('op')}<input class="inp" id="mFixed" value="${esc(IMP.fixedOp)}" list="opsList2" placeholder="или напиши оператор за всички редове"><datalist id="opsList2">${OPS.map(o=>`<option value="${esc(o)}">`).join('')}</datalist></label>`:`<label class="f">${lbl}${req?' <em>*</em>':''}${sel(f)}</label>`).join('')}
+ <p class="sub">Посочи коя колона кое е. Изборът се запомня за следващите файлове със същите колони.</p>
+ ${[...FIELDS,...liveDefs().map(d=>['x:'+d.id,d.name])].map(([f,lbl,req])=>`<label class="f">${esc(lbl)}${req?' <em>*</em>':''}${sel(f)}</label>`).join('')}
  <div id="mFree"></div>
  <div id="mPrev"></div>
  <div class="actions"><button class="btn sec" type="button" data-close>Отказ</button><button class="btn" type="button" id="mNext">Преглед</button></div>`);
- const free=()=>{const used=new Set(Object.values(IMP.map));const cols=IMP.header.map((h,i)=>[h,i]).filter(([h,i])=>!used.has(i));
-  p.querySelector('#mFree').innerHTML=cols.length?`<div class="gl">Други колони във файла</div><p class="sub">Отметни ги, за да станат нови полета на обектите.</p>`+
+ const free=()=>{const cols=freeCols();
+  p.querySelector('#mFree').innerHTML=cols.length?`<div class="gl">Други колони във файла</div><p class="sub">Отметнатите стават нови полета на обектите.</p>`+
    cols.map(([h,i])=>`<label class="check"><input type="checkbox" data-nc="${i}" ${IMP.newCols.has(i)?'checked':''}><span>${esc(h)}${IMP.data[0]&&String(IMP.data[0][i]??'').trim()?` <small class="sub">· ${esc(String(IMP.data[0][i]).slice(0,30))}</small>`:''}</span></label>`).join(''):'';};
  const upd=()=>{
   p.querySelectorAll('select[data-f]').forEach(s=>{const v=s.value;if(v==='')delete IMP.map[s.dataset.f];else IMP.map[s.dataset.f]=+v;});
-  const used=new Set(Object.values(IMP.map));
+  const used=new Set(Object.entries(IMP.map).filter(([k])=>!k.startsWith('x:new')).map(([,v])=>v));
   p.querySelectorAll('[data-nc]').forEach(c=>{const i=+c.dataset.nc;if(c.checked&&!used.has(i))IMP.newCols.add(i);else IMP.newCols.delete(i);});
-  for(const k of Object.keys(IMP.map))if(k.startsWith('x:new'))delete IMP.map[k];
-  IMP.pending=[...IMP.newCols].map((i,n)=>({id:'new'+i,name:IMP.header[i],type:'text',opts:[],badge:0,warn:0,ord:0,u:0,by:'',del:0}));
-  IMP.pending.forEach(d=>IMP.map['x:'+d.id]=+d.id.slice(3));
-  IMP.fixedOp=p.querySelector('#mFixed').value.trim();IMP.mode=p.querySelector('input[name=mode]:checked').value;
+  for(const i of [...IMP.newCols])if(used.has(i))IMP.newCols.delete(i);
+  syncPending();
   const box=p.querySelector('#mPrev'),btn=p.querySelector('#mNext');
-  const hasC=(IMP.map.lat!==undefined&&IMP.map.lon!==undefined)||IMP.map.coords!==undefined;
+  const hasC=hasCoordsMap();
   if(IMP.map.id===undefined){box.innerHTML='<div class="msg">Избери колоната с номера на обекта.</div>';btn.disabled=true;return;}
-  if(IMP.map.op===undefined&&!IMP.fixedOp){box.innerHTML='<div class="msg">Избери колона за оператора или го напиши за всички редове.</div>';btn.disabled=true;return;}
   const pr=parseRows();IMP.parsed=pr;btn.disabled=!pr.recs.length;
-  const ex=pr.recs.slice(0,3).map(r=>`${r.id.padEnd(10)} ${String(r.op).slice(0,12).padEnd(12)} ${r.lat!==undefined?fx(r.lat)+', '+fx(r.lon):'без координати'}  ${r.name||Object.values(r.x).join(' · ')}`).join('\n');
+  const ex=pr.recs.slice(0,3).map(r=>`${r.id.padEnd(10)} ${r.lat!==undefined?fx(r.lat)+', '+fx(r.lon):'без координати'}  ${r.name||Object.values(r.x).join(' · ')}`).join('\n');
   const w=[];if(pr.skipped.noid)w.push(`${pr.skipped.noid} реда без номер`);if(pr.skipped.nocoord&&hasC)w.push(`${pr.skipped.nocoord} реда без валидни координати (ще обновят само вече съществуващи обекти)`);
   if(pr.swapped)w.push(`на ${pr.swapped} реда ширината и дължината бяха разменени и ги оправих`);if(pr.outside)w.push(`${pr.outside} точки са извън България`);
   box.innerHTML=`${hasC?'':'<div class="msg">Без колона с координати: ще се обновят само обекти, които вече са в базата. Нови няма да се добавят.</div>'}<p class="sub">Разпознати: <b>${num(pr.recs.length)}</b> реда от ${num(IMP.data.length)}.</p>${ex?`<div class="prev">${esc(ex)}</div>`:''}${w.length?`<div class="msg">Внимание: ${esc(w.join('; '))}.</div>`:''}`;
  };
  p.addEventListener('change',e=>{if(e.target.id==='mSheet'){IMP.sheet=e.target.value;prepSheet();openMapping();return;}
   if(e.target.matches('select[data-f]')){upd();free();return;}upd();});
- p.querySelector('#mFixed').addEventListener('input',upd);
  p.querySelector('#mNext').onclick=()=>openTablePreview();
  free();upd();
 }
-const same=(a,b)=>xsig(a)===xsig(b)&&a.id===b.id&&(a.name||'')===(b.name||'')&&(a.addr||'')===(b.addr||'')&&a.op===b.op&&(a.own||'')===(b.own||'')&&(a.opt||1)===(b.opt||1)&&Math.abs(a.lat-b.lat)<1e-6&&Math.abs(a.lon-b.lon)<1e-6;
+const same=(a,b)=>xsig(a)===xsig(b)&&a.id===b.id&&(a.name||'')===(b.name||'')&&(a.addr||'')===(b.addr||'')&&(a.own||'')===(b.own||'')&&(a.opt||1)===(b.opt||1)&&Math.abs(a.lat-b.lat)<1e-6&&Math.abs(a.lon-b.lon)<1e-6;
 function openTablePreview(){
  const pr=IMP.parsed,map=new Map(ALL.map(r=>[r.k,r]));
  const add=[],chg=[];let eq=0,noc=0;
@@ -764,28 +762,32 @@ function openTablePreview(){
   if(!c||c.del){if(r0.lat===undefined){noc++;continue;}add.push({name:'',addr:'',own:'',...r0});continue;}
   const r={...c,...r0,x:{...(c.x||{}),...r0.x}};
   if(same(c,r))eq++;else chg.push(r);}
- let miss=[];
- if(IMP.mode==='full'){const keys=new Set(pr.recs.map(r=>r.k)),ops=new Set(pr.recs.map(r=>r.op));miss=L.filter(r=>ops.has(r.op)&&!keys.has(r.k));}
- const p=sheet('Преглед на промените',`
+ // objects missing from the file are offered for removal only when the file looks like a full list
+ const keys=new Set(pr.recs.map(r=>r.k));
+ const miss=L.length&&(eq+chg.length)>=L.length*0.5?L.filter(r=>!keys.has(r.k)):[];
+ const nf=(IMP.pending||[]).filter(d=>!liveDefs().some(x=>norm(x.name)===norm(d.name)));
+ const p=sheet('Импорт: '+IMP.name,`
  <div class="sum"><div class="good"><span>Нови</span><b>${num(add.length)}</b></div><div class="chg"><span>Променени</span><b>${num(chg.length)}</b></div><div><span>Без промяна</span><b>${num(eq)}</b></div>${noc?`<div><span>Пропуснати (нови без координати)</span><b>${num(noc)}</b></div>`:''}
- ${IMP.mode==='full'?`<div class="bad"><span>Липсват във файла</span><b>${num(miss.length)}</b></div>`:''}</div>
+ ${miss.length?`<div class="bad"><span>Има в базата, но липсват във файла</span><b>${num(miss.length)}</b></div>`:''}</div>
+ ${nf.length?`<p class="sub">Нови полета от колоните: <b>${esc(nf.map(d=>d.name).join(', '))}</b></p>`:''}
+ ${pr.skipped.noid||pr.swapped?`<p class="sub">${[pr.skipped.noid?`${pr.skipped.noid} реда без номер са пропуснати`:'',pr.swapped?`на ${pr.swapped} реда ширината и дължината бяха разменени и ги оправих`:''].filter(Boolean).join('; ')}.</p>`:''}
  ${chg.length?`<p class="sub">Променени: ${esc(chg.slice(0,8).map(r=>r.id).join(', '))}${chg.length>8?' и още '+(chg.length-8):''}</p>`:''}
  ${miss.length?`<p class="sub">Липсващи: ${esc(miss.slice(0,8).map(r=>r.id).join(', '))}${miss.length>8?' и още '+(miss.length-8):''}</p>
-  <label class="check"><input type="checkbox" id="pRm"><span>Изтрий липсващите ${num(miss.length)} обекта<br><small class="sub">По подразбиране остават. Изтрий ги само ако файлът наистина е пълният актуален списък за ${esc([...new Set(miss.map(r=>r.op))].join(', '))}.</small></span></label>`:''}
- <div class="actions"><button class="btn sec" type="button" id="pBack">Назад</button><button class="btn" type="button" id="pGo" ${add.length+chg.length+miss.length?'':'disabled'}>Приложи</button></div>`);
+  <label class="check"><input type="checkbox" id="pRm"><span>Изтрий липсващите ${num(miss.length)}<br><small class="sub">По подразбиране остават. Изтрий ги само ако файлът е пълният актуален списък.</small></span></label>`:''}
+ <div class="actions"><button class="btn sec" type="button" id="pBack">Колони</button><button class="btn" type="button" id="pGo" ${add.length+chg.length+miss.length?'':'disabled'}>Приложи</button></div>`);
  p.querySelector('#pBack').onclick=openMapping;
  p.querySelector('#pGo').onclick=async()=>{
   const t=now(),by=META.author,idx=new Map(ALL.map((r,i)=>[r.k,i]));
-  for(const r of [...add,...chg]){const rec={...r,u:t,by,del:0};const i=idx.get(r.k);if(i===undefined){idx.set(r.k,ALL.length);ALL.push(rec);}else ALL[i]=rec;}
+  for(const r of [...add,...chg]){const rec={...r,u:t,by,del:0};delete rec.op;const i=idx.get(r.k);if(i===undefined){idx.set(r.k,ALL.length);ALL.push(rec);}else ALL[i]=rec;}
   let rm=0;if(miss.length&&p.querySelector('#pRm')?.checked){for(const r of miss){const i=idx.get(r.k);ALL[i]={...ALL[i],del:1,u:t,by};rm++;}}
   // columns ticked as new fields become real field definitions
   const ren={};let ord=Math.max(-1,...DEFS.map(x=>x.ord));
   for(const d of IMP.pending||[]){const ex=liveDefs().find(x=>norm(x.name)===norm(d.name));
    const nd=ex||{...d,id:'f'+now().toString(36)+d.id,ord:++ord,u:t,by};if(!ex)DEFS.push(nd);ren[d.id]=nd.id;IMP.map['x:'+nd.id]=IMP.map['x:'+d.id];delete IMP.map['x:'+d.id];}
   if(Object.keys(ren).length)for(const r of [...add,...chg]){const i=idx.get(r.k);const x=ALL[i].x||{};for(const [o,n] of Object.entries(ren))if(o in x){x[n]=x[o];delete x[o];}ALL[i].x=x;}
-  META.maps=META.maps||{};META.maps[IMP.sig]={map:IMP.map,fixedOp:IMP.fixedOp};
+  META.maps=META.maps||{};META.maps[IMP.sig]={map:IMP.map};
   await persist();rebuild();closeSheet();search();
-  toast(`Готово: ${add.length} нови, ${chg.length} променени${rm?`, ${rm} изтрити`:''}`);IMP=null;
+  toast(`Готово: ${add.length} нови, ${chg.length} променени${rm?`, ${rm} изтрити`:''}${nf.length?`, ${nf.length} нови полета`:''}`);IMP=null;
  };
 }
 
@@ -878,7 +880,7 @@ function openMergePreview(pkg){
   for(const d of pd.ap){const rec={id:String(d.id),name:String(d.name),type:d.type,opts:Array.isArray(d.opts)?d.opts.map(String):[],badge:d.badge?1:0,warn:d.warn?1:0,ord:+d.ord||0,u:d.u||0,by:d.by||'',del:d.del?1:0};
    const i=DEFS.findIndex(x=>x.id===rec.id);if(i>=0)DEFS[i]=rec;else DEFS.push(rec);}
   for(const r of plan.apply){const x={};if(r.x&&typeof r.x==='object')for(const [k,v] of Object.entries(r.x))if(v!==null&&v!==undefined&&String(v)!=='')x[String(k)]=String(v);
-   const rec={k:r.k,op:r.op,id:r.id,name:r.name||'',addr:r.addr||'',own:r.own||'',opt:r.opt||null,lat:+r.lat,lon:+r.lon,x,u:r.u||0,by:r.by||'',del:r.del?1:0};
+   const rec={k:r.k,id:r.id,name:r.name||'',addr:r.addr||'',own:r.own||'',opt:r.opt||null,lat:+r.lat,lon:+r.lon,x,u:r.u||0,by:r.by||'',del:r.del?1:0};
    const i=idx.get(r.k);if(i===undefined){idx.set(r.k,ALL.length);ALL.push(rec);}else ALL[i]=rec;}
   META.lastPkg={by:pkg.by,created:pkg.created};
   await persist();rebuild();closeSheet();search();toast(`Слято: ${plan.add} нови, ${plan.upd} обновени${plan.rm?`, ${plan.rm} изтрити`:''}`);
