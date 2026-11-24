@@ -493,7 +493,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='24';
+const APP_VER='25';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -515,10 +515,10 @@ function dir(a,b){const y=Math.sin((b.lon-a.lon)*R)*Math.cos(b.lat*R),x=Math.cos
 const fx=n=>String(Math.round(n*1e6)/1e6);
 // Waze: iPhone and computers use the universal link; Android opens the Waze app directly,
 // because there the web link often reaches Waze without the point.
-// launchFlags restart Waze, because an already open Waze ignores a new point
+// A search by the coordinates (q + ll) opens the point card reliably, whether Waze was open or not.
 const IS_ANDROID=/android/i.test(navigator.userAgent||'');
 function wazeHref(ll){const web=`https://waze.com/ul?ll=${ll}&z=17`;
- return IS_ANDROID?`intent://?ll=${ll}&z=17#Intent;scheme=waze;package=com.waze;launchFlags=0x10008000;S.browser_fallback_url=${encodeURIComponent(web)};end`:web;}
+ return IS_ANDROID?`intent://?q=${encodeURIComponent(ll)}&ll=${ll}#Intent;scheme=waze;package=com.waze;S.browser_fallback_url=${encodeURIComponent(web)};end`:web;}
 const keyOf=r=>String(r.id).trim().toUpperCase()+'|'+(r.opt||1);
 const ownerOf=r=>(r.own||'').trim()||'Без собственик';
 
