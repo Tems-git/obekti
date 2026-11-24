@@ -493,7 +493,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='22';
+const APP_VER='23';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -513,6 +513,11 @@ function brg(a,b){const y=Math.sin((b.lon-a.lon)*R)*Math.cos(b.lat*R),x=Math.cos
 function dir(a,b){const y=Math.sin((b.lon-a.lon)*R)*Math.cos(b.lat*R),x=Math.cos(a.lat*R)*Math.sin(b.lat*R)-Math.sin(a.lat*R)*Math.cos(b.lat*R)*Math.cos((b.lon-a.lon)*R);
   const deg=(Math.atan2(y,x)/R+360)%360;return (LANG==='en'?['N','NE','E','SE','S','SW','W','NW']:['С','СИ','И','ЮИ','Ю','ЮЗ','З','СЗ'])[Math.round(deg/45)%8];}
 const fx=n=>String(Math.round(n*1e6)/1e6);
+// Waze: iPhone and computers use the universal link; Android opens the Waze app directly,
+// because there the web link often reaches Waze without the point
+const IS_ANDROID=/android/i.test(navigator.userAgent||'');
+function wazeHref(ll){const web=`https://waze.com/ul?ll=${ll}&z=17`;
+ return IS_ANDROID?`intent://?ll=${ll}&z=17#Intent;scheme=waze;package=com.waze;S.browser_fallback_url=${encodeURIComponent(web)};end`:web;}
 const keyOf=r=>String(r.id).trim().toUpperCase()+'|'+(r.opt||1);
 const ownerOf=r=>(r.own||'').trim()||'Без собственик';
 
@@ -610,7 +615,7 @@ function card(k){
    (o?(isOrigin?'<span class="dist origin">избран</span>':`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+
    (isOrigin?'':`<button class="nb" type="button" data-near="${esc(r.k)}">${IC.near}Наблизо</button>`)+`</div>`;
  h+=`<div class="b"><a class="gm" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">${IC.map}Google Maps</a>`+
-   `<a class="wz" href="https://waze.com/ul?ll=${ll}&z=17" target="_blank" rel="noopener">${IC.nav}Waze</a>`+
+   `<a class="wz" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>${IC.nav}Waze</a>`+
    `<button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите">${IC.cp}</button></div></article>`;
  return h;
 }
@@ -750,7 +755,7 @@ function closeMap(){$('#mapView').hidden=true;document.body.style.overflow='';}
 function popupHtml(r,o){const ll=fx(r.lat)+','+fx(r.lon);const [ad]=r.addr?splitAddr(r.addr):[''];
  return `<div class="pp"><div><b class="pid">${esc(r.id)}</b><span class="pn">${esc(r.name||'')}</span></div>${ad?`<div class="pa">${esc(ad)}</div>`:''}`+
   (o?`<div class="pd">${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</div>`:'')+
-  `<div class="pb"><a class="g" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">Google Maps</a><a class="w" href="https://waze.com/ul?ll=${ll}&z=17" target="_blank" rel="noopener">Waze</a></div></div>`;}
+  `<div class="pb"><a class="g" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">Google Maps</a><a class="w" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>Waze</a></div></div>`;}
 function drawMap(fit){
  if(!MAP||!mapOpen())return;
  mapLayer.clearLayers();const o=origin();const cs=getComputedStyle(document.documentElement);
