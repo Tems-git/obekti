@@ -613,7 +613,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='33';
+const APP_VER='34';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -774,7 +774,8 @@ function coloOf(r){
  const me=String(r.id).toUpperCase().replace(/\s+/g,'');
  // "us" = this site's own ID, or A1 / ETS (EuroTeleSites) named in the column
  const isMe=v=>{const parts=String(v).toUpperCase().split(/[\s,;\/()]+/).filter(Boolean);return parts.includes(me)||parts.some(p=>p==='A1'||p==='ETS'||p.startsWith('EUROTELE'));};
- const role=!guests.length&&(!host||isMe(host))?'solo':isMe(host)?'host':guests.some(isMe)?'guest':'colo';
+ // host: A1/ETS in Host and someone is a guest; guest: someone else is the host, or A1/ETS are listed as a guest; otherwise standalone
+ const role=host&&isMe(host)?(guests.length?'host':'solo'):(host&&!isMe(host))||guests.some(isMe)?'guest':'solo';
  return {host,guests,role};}
 const ROLE_NAME={host:['Домакин','Host'],guest:['Гост','Guest'],solo:['Самостоятелен','Standalone'],colo:['Колокация','Colocation']};
 const roleName=k=>ROLE_NAME[k][LANG==='en'?1:0];
