@@ -207,10 +207,47 @@ textarea.inp{min-height:76px;resize:vertical;font:15px/1.4 var(--sans)}
 .dist.origin{background:var(--accent);color:var(--accent-ink)}
 .nb{margin-left:auto;display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:var(--accent);font:600 13px var(--sans);padding:6px 2px;cursor:pointer}
 .b{display:flex;gap:8px;margin-top:4px;padding-top:10px;border-top:1px dashed var(--line)}
-.b a,.b button{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;text-decoration:none;font:600 15px/1 var(--sans);padding:12px 8px;border-radius:10px;border:0;cursor:pointer}
+.b a,.b button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:1;min-width:0;white-space:nowrap;text-decoration:none;font:600 14.5px/1 var(--sans);padding:12px 6px;border-radius:10px;border:0;cursor:pointer}
 .b a:active,.b button:active{transform:scale(.98)}
 .gm{background:linear-gradient(160deg,var(--accent),color-mix(in srgb,var(--accent) 80%,#000));color:var(--accent-ink)}
 .wz{background:var(--waze-soft);color:var(--waze)}
+.b .rtb,.b .cp{flex:0 0 44px!important}
+.rtb{flex:0 0 46px!important;background:transparent;border:1px solid var(--line)!important;color:var(--accent)}
+.rtb.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)!important}
+.routebar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 18px rgba(10,30,40,.1);padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.rbin{display:flex;align-items:center;gap:10px;font-size:14px}
+.rbin #rbTxt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.rbin #rbTxt b{color:var(--fg)}
+.rbic{color:var(--accent);display:grid}
+body.has-route main{padding-bottom:calc(90px + env(safe-area-inset-bottom,0px))}
+body.has-route .toast{bottom:calc(82px + env(safe-area-inset-bottom,0px))}
+.rtadd{display:flex;gap:8px;align-items:flex-start}
+.rtadd textarea{min-height:46px;flex:1;min-width:0}
+.rtsum{font-size:14px;color:var(--fg)}
+.rtsum small{color:var(--muted)}
+.rtact{display:flex;gap:8px;flex-wrap:wrap}
+.rtact .btn{flex:1}
+.btn.danger.sec{background:var(--danger);color:#fff;border-color:var(--danger)}
+.rtlist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.rtlist li{display:flex;align-items:center;gap:8px;padding:9px 8px 9px 10px;border-top:1px solid var(--line)}
+.rtlist li:first-child{border-top:0}
+.rtlist .rn{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:700 12px/24px var(--sans);text-align:center}
+.rtlist li.done .rn{background:var(--line);color:var(--muted)}
+.rtlist li.done .rtx{text-decoration:line-through;color:var(--muted)}
+.rchk input{width:20px;height:20px;accent-color:var(--accent);display:block}
+.rtx{flex:1;min-width:0;font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.rtx .rid{font:600 12.5px var(--mono)}
+.rtx small{display:block;color:var(--muted);font:12px var(--mono)}
+.rbt{display:flex;gap:4px;flex:none}
+.rbt .mini{width:30px;height:30px}
+.rtnav{display:flex;flex-direction:column;gap:8px}
+.rtnav .btn{text-decoration:none}
+.rtnav .wz2{background:var(--waze-soft);color:var(--waze)}
+.msg.ok{background:var(--accent-soft)}
+.rnum{width:28px;height:28px;border-radius:50%;background:#0a6e78;color:#fff;border:3px solid #fff;font:700 13px/22px var(--sans);text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.rnum.done{background:#9aa6b2}
+.pp .pb button.r{flex:1;border:1px solid #0a6e78;background:#fff;color:#0a6e78;font-weight:600;font-size:13px;padding:7px 6px;border-radius:8px;cursor:pointer;margin-bottom:6px}
+.pp .pb button.r.on{background:#0a6e78;color:#fff}
 .cp{flex:0 0 46px!important;background:transparent;border:1px solid var(--line)!important;color:var(--muted)}
 .cp.ok{color:var(--accent);border-color:var(--accent)!important}
 .more{display:block;width:100%;padding:13px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--fg);font:600 15px var(--sans);cursor:pointer}
@@ -372,6 +409,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
   <div id="map"></div>
 </div>
 <div class="sheet" id="sheet" hidden></div>
+<div class="routebar" id="routeBar" hidden><div class="wrap rbin"><span class="rbic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6"/><circle cx="18" cy="5" r="2.2"/></svg></span><span id="rbTxt"></span><button class="btn small" type="button" id="rbOpen">Отвори</button></div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 <input type="file" id="fileTable" accept=".xlsx,.xls,.csv,.txt,.ods" hidden>
 <input type="file" id="filePkg" hidden>
@@ -441,7 +479,7 @@ const EN={
 'Обновени (по-нова промяна в пакета)':'Updated (newer change in the package)','Изтрити от колегата':'Deleted by the colleague','Твоите по-нови промени, които остават':'Your newer changes, which stay',
 'Полета: нови или променени':'Fields: new or changed','Нищо от твоята база не се губи. При един и същ обект остава по-новата промяна. След сливането можеш да споделиш обновения пакет.':'Nothing in your database is lost. For the same site the newer change wins. After merging you can share the updated package.',
 'Слей':'Merge','Няма нищо ново':'Nothing new','Хранилището на браузъра е недостъпно':'Browser storage is unavailable','Провери дали не си в частен режим (Private) на Safari.':'Check that Safari is not in Private mode.',
-'Език':'Language','Празните клетки изтриват стойността':'Empty cells clear the value','Ако си изтрил нещо в Excel (например Site Access), то се изтрива и тук. Важи само за колоните, които ги има във файла.':'If you deleted something in Excel (for example Site Access), it is deleted here too. Only for columns that are in the file.','Колокация':'Colocation','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
+'Език':'Language','Отвори':'Open','Празните клетки изтриват стойността':'Empty cells clear the value','Ако си изтрил нещо в Excel (например Site Access), то се изтрива и тук. Важи само за колоните, които ги има във файла.':'If you deleted something in Excel (for example Site Access), it is deleted here too. Only for columns that are in the file.','Колокация':'Colocation','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
 };
 const ENRX=[
  [/^Детайли · (\d+)$/,'Details · $1'],
@@ -508,7 +546,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='30';
+const APP_VER='31';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -555,6 +593,8 @@ const IC={
  key:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
  up:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
  down:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+ rt:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6"/><path d="M18 2.5v5M15.5 5h5"/></svg>',
+ rtOn:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h4"/><path d="M15.5 5l2 2 3.5-4"/></svg>',
  lock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>'
 };
 
@@ -639,6 +679,7 @@ function card(k){
    (isOrigin?'':`<button class="nb" type="button" data-near="${esc(r.k)}">${IC.near}Наблизо</button>`)+`</div>`;
  h+=`<div class="b"><a class="gm" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">${IC.map}Google Maps</a>`+
    `<a class="wz" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>${IC.nav}Waze</a>`+
+   `<button class="rtb${inRoute(r.k)?' on':''}" data-rt="${esc(r.k)}" type="button" aria-label="${inRoute(r.k)?T('Махни от маршрута','Remove from route'):T('Добави в маршрута','Add to route')}" title="${inRoute(r.k)?T('В маршрута','In route'):T('Добави в маршрута','Add to route')}">${inRoute(r.k)?IC.rtOn:IC.rt}</button>`+
    `<button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите">${IC.cp}</button></div></article>`;
  return h;
 }
@@ -757,6 +798,7 @@ function search(){
  info.innerHTML=L.length?(res.length===G.length?`<b>${num(G.length)}</b> обекта`:`<b>${num(res.length)}</b> от ${num(G.length)}`):'';
  $('#topStats').innerHTML=L.length?(d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).slice(2)}`)(new Date(META.changed||Date.now())):'Базата е празна';
  renderPills();
+ renderRouteBar();
  updateNearbar();
  render(false);
  try{localStorage.setItem('q',q.value);localStorage.setItem('op',opF)}catch(e){}
@@ -793,8 +835,12 @@ function loadLeaflet(){if(window.L&&window.L.map){LF=window.L;return Promise.res
  return new Promise((res,rej)=>{const c=document.createElement('link');c.rel='stylesheet';c.href='vendor/leaflet/leaflet.css';document.head.appendChild(c);
   const s=document.createElement('script');s.src='vendor/leaflet/leaflet.js';s.onload=()=>{LF=window.L;res();};s.onerror=()=>rej(new Error('Картата не се зареди. Отвори приложението веднъж с интернет.'));document.head.appendChild(s);});}
 const mapOpen=()=>!$('#mapView').hidden;
-async function openMap(){
- if(!near)return;
+let MAPMODE='near';
+async function openMap(mode){
+ MAPMODE=mode==='route'?'route':'near';
+ if(MAPMODE==='near'&&!near)return;
+ if(MAPMODE==='route'&&!routeRecs().length)return;
+ closeSheet();
  try{await loadLeaflet();}catch(e){toast(e.message);return;}
  $('#mapView').hidden=false;document.body.style.overflow='hidden';
  if(!MAP){MAP=LF.map('map',{zoomControl:true});
@@ -806,11 +852,13 @@ function closeMap(){$('#mapView').hidden=true;document.body.style.overflow='';}
 function popupHtml(r,o){const ll=fx(r.lat)+','+fx(r.lon);const [ad]=r.addr?splitAddr(r.addr):[''];
  const acc=defBy(RX_ACCESS).map(d=>String((r.x||{})[d.id]??'').trim()).find(Boolean);
  return `<div class="pp"><div><b class="pid">${esc(r.id)}</b><span class="pn">${esc(r.name||'')}</span>${acc?`<span class="acclock">${IC_LOCK}</span>`:''}</div>${ad?`<div class="pa">${esc(ad)}</div>`:''}`+
-  (o?`<div class="pd">${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</div>`:'')+
-  `<div class="pb"><a class="g" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">Google Maps</a><a class="w" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>Waze</a></div></div>`;}
+  (o&&near?`<div class="pd">${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</div>`:'')+
+  `<div class="pb"><button type="button" class="r${inRoute(r.k)?' on':''}" data-rt="${esc(r.k)}">${inRoute(r.k)?T('✓ В маршрута','✓ In route'):T('+ Маршрут','+ Route')}</button></div><div class="pb"><a class="g" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">Google Maps</a><a class="w" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>Waze</a></div></div>`;}
 function drawMap(fit){
  if(!MAP||!mapOpen())return;
- mapLayer.clearLayers();const o=origin();const cs=getComputedStyle(document.documentElement);
+ mapLayer.clearLayers();
+ if(MAPMODE==='route'){drawRouteMap(fit);return;}
+ const o=origin();const cs=getComputedStyle(document.documentElement);
  const items=res.slice(0,150).map(it=>L[sel.get(it.g)??it.best]);
  for(const r of items.slice().reverse()){
   const isO=near&&near.type==='site'&&r.k===near.k;
@@ -825,7 +873,108 @@ function drawMap(fit){
  if(fit){const pts=[];if(o)pts.push([o.lat,o.lon]);items.slice(0,12).forEach(r=>pts.push([r.lat,r.lon]));
   if(pts.length>1)MAP.fitBounds(pts,{padding:[40,40],maxZoom:16});else if(pts.length)MAP.setView(pts[0],14);}
 }
-$('#nearMap').onclick=openMap;$('#mapBack').onclick=closeMap;
+$('#nearMap').onclick=()=>openMap('near');$('#mapBack').onclick=()=>{closeMap();if(MAPMODE==='route')openRoute();};
+$('#map').addEventListener('click',e=>{const b=e.target.closest('[data-rt]');if(!b)return;toggleRoute(b.dataset.rt);
+ b.classList.toggle('on',inRoute(b.dataset.rt));b.textContent=inRoute(b.dataset.rt)?T('✓ В маршрута','✓ In route'):T('+ Маршрут','+ Route');
+ if(MAPMODE==='route')drawMap(false);else rerenderCard(b.dataset.rt);});
+
+/* ====================== route: several sites in one trip ======================
+   Kept on this phone only (browser storage). Google Maps takes the whole trip in parts of up to 10 stops;
+   Waze takes one stop at a time. */
+const T=(bg,en)=>LANG==='en'?en:bg;
+let ROUTE={keys:[],done:[]};
+try{const s=JSON.parse(localStorage.getItem('route')||'null');if(s&&Array.isArray(s.keys))ROUTE={keys:s.keys,done:Array.isArray(s.done)?s.done:[]};}catch(e){}
+function saveRoute(){try{localStorage.setItem('route',JSON.stringify(ROUTE))}catch(e){}renderRouteBar();}
+const inRoute=k=>ROUTE.keys.includes(k);
+const routeRecs=()=>ROUTE.keys.map(k=>L[KEYI.get(k)]).filter(Boolean);
+const isDone=r=>ROUTE.done.includes(r.k);
+function toggleRoute(k){if(inRoute(k)){ROUTE.keys=ROUTE.keys.filter(x=>x!==k);ROUTE.done=ROUTE.done.filter(x=>x!==k);}else ROUTE.keys.push(k);saveRoute();}
+function rerenderCard(key){const art=[...list.querySelectorAll('.c')].find(a=>{const it=res[+a.dataset.k];return it&&G[it.g].some(p=>L[p].k===key);});if(art)art.outerHTML=card(+art.dataset.k);}
+function routeKm(recs,from){let d=0,prev=from;for(const r of recs){if(prev)d+=km(prev,r);prev=r;}return d;}
+function renderRouteBar(){
+ const rs=routeRecs(),bar=$('#routeBar');ROUTE.keys=ROUTE.keys.filter(k=>KEYI.has(k));
+ document.body.classList.toggle('has-route',rs.length>0);bar.hidden=!rs.length;if(!rs.length)return;
+ const left=rs.filter(r=>!isDone(r));
+ $('#rbTxt').innerHTML=`<b>${T('Маршрут','Route')}</b> · ${num(rs.length)} ${T(rs.length===1?'обект':'обекта',rs.length===1?'site':'sites')}${left.length<rs.length?` · ${T('остават','left')} ${num(left.length)}`:''} · ~${fmtKm(routeKm(left,me))}`;
+}
+// shortest order: nearest neighbour from the start point, then 2-opt improvement
+function optimize(points,start){
+ const rest=points.slice(),out=[];let cur=start||rest.shift();if(!start)out.push(cur);
+ while(rest.length){let bi=0,bd=Infinity;rest.forEach((p,i)=>{const d=km(cur,p);if(d<bd){bd=d;bi=i;}});cur=rest.splice(bi,1)[0];out.push(cur);}
+ const pts=start?[start,...out]:out,len=a=>{let s=0;for(let i=1;i<a.length;i++)s+=km(a[i-1],a[i]);return s;};
+ let improved=true,guard=0;
+ while(improved&&guard++<60){improved=false;
+  for(let i=1;i<pts.length-1;i++)for(let j=i+1;j<pts.length;j++){
+   const a=pts[i-1],b=pts[i],c=pts[j],d=pts[j+1];
+   const before=km(a,b)+(d?km(c,d):0),after=km(a,c)+(d?km(b,d):0);
+   if(after+1e-9<before){pts.splice(i,j-i+1,...pts.slice(i,j+1).reverse());improved=true;}}}
+ return start?pts.slice(1):pts;}
+function gmapsLinks(recs){
+ // first part starts from the phone's location; each next part starts where the previous ended
+ const parts=[];for(let i=0;i<recs.length;i+=10)parts.push(recs.slice(i,i+10));
+ return parts.map((p,n)=>{const c=r=>fx(r.lat)+','+fx(r.lon);const dest=p[p.length-1],way=p.slice(0,-1);
+  const origin=n?`&origin=${c(parts[n-1][parts[n-1].length-1])}`:'';
+  return {from:n*10+1,to:n*10+p.length,href:`https://www.google.com/maps/dir/?api=1${origin}&destination=${c(dest)}${way.length?'&waypoints='+encodeURIComponent(way.map(c).join('|')):''}&travelmode=driving`};});}
+function findByToken(tok){
+ const up=tok.toUpperCase();
+ let g=G.find(p=>String(L[p[0]].id).toUpperCase()===up);if(g)return g;
+ const dg=up.replace(/\D/g,'').replace(/^0+/,'');if(!dg||dg.length<2)return null;
+ const m=G.filter(p=>String(L[p[0]].id).replace(/\D/g,'').replace(/^0+/,'')===dg);
+ return m.length===1?m[0]:null;}
+function openRoute(){
+ const rs=routeRecs(),left=rs.filter(r=>!isDone(r));
+ const links=gmapsLinks(left),next=left[0];
+ let prev=me,acc='';
+ const rows=rs.map((r,i)=>{const d=prev&&!isDone(r)?km(prev,r):null;if(!isDone(r))prev=r;
+  return `<li class="${isDone(r)?'done':''}" data-k="${esc(r.k)}"><span class="rn">${i+1}</span>
+  <label class="rchk" title="${T('Посетен','Visited')}"><input type="checkbox" data-done ${isDone(r)?'checked':''} aria-label="${T('Посетен','Visited')}"></label>
+  <span class="rtx"><b class="rid">${esc(r.id)}</b> ${esc(r.name||'')}${d!==null?`<small>${i===0&&me?T('от теб ','from you '):'+'}${fmtKm(d)}</small>`:''}</span>
+  <span class="rbt"><button type="button" class="mini" data-mv="-1" ${i?'':'disabled'} aria-label="${T('Нагоре','Up')}">${IC.up}</button><button type="button" class="mini" data-mv="1" ${i<rs.length-1?'':'disabled'} aria-label="${T('Надолу','Down')}">${IC.down}</button><button type="button" class="mini" data-rm aria-label="${T('Махни','Remove')}">${IC.x}</button></span></li>`;}).join('');
+ const p=sheet(T('Маршрут','Route'),`
+ <div class="rtadd"><textarea class="inp" id="rtPaste" rows="2" placeholder="${T('Постави номера на обекти, например SOF0002, SOF0100 PLD0123','Paste site IDs, e.g. SOF0002, SOF0100 PLD0123')}"></textarea><button class="btn small" type="button" id="rtAdd">${T('Добави','Add')}</button></div>
+ <div id="rtMsg"></div>
+ ${rs.length?`<div class="rtsum">${num(rs.length)} ${T(rs.length===1?'обект':'обекта',rs.length===1?'site':'sites')}${left.length<rs.length?` · ${T('остават','left')} ${num(left.length)}`:''} · ~${fmtKm(routeKm(left,me))} ${T('по въздуха','straight-line')}${me?'':` <small>(${T('без твоето място','without your location')})</small>`}</div>
+ <div class="rtact"><button class="btn sec small" type="button" id="rtOpt">${T('Подреди най-кратко','Shortest order')}</button><button class="btn sec small" type="button" id="rtMap">${T('На картата','On the map')}</button><button class="btn sec small" type="button" id="rtClr">${T('Изчисти','Clear')}</button></div>
+ <ol class="rtlist">${rows}</ol>
+ ${left.length?`<div class="gl">${T('Навигация','Navigation')}</div>
+ <div class="rtnav">${links.map(l=>`<a class="btn" href="${l.href}" target="_blank" rel="noopener">${IC.map}Google Maps${links.length>1?` · ${l.from}–${l.to}`:` · ${T('целият маршрут','whole route')}`}</a>`).join('')}
+ ${next?`<a class="btn wz2" href="${wazeHref(fx(next.lat)+','+fx(next.lon))}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>${IC.nav}Waze ${T('до','to')} ${esc(next.id)}</a>`:''}</div>
+ <p class="sub">${links.length>1?T('Google Maps приема до 10 спирки наведнъж, затова маршрутът е на части. ','Google Maps takes up to 10 stops at once, so the route is split into parts. '):''}${T('Waze води до един обект наведнъж: отметни го като посетен и бутонът минава на следващия.','Waze goes to one site at a time: tick it as visited and the button moves to the next one.')}</p>`:(rs.length?`<p class="sub">${T('Всички обекти са посетени.','All sites are visited.')}</p>`:'')}`
+ :`<p class="sub">${T('Добави обекти с бутона ＋ на картите, от балончетата на картата или като поставиш номерата им тук.','Add sites with the ＋ button on the cards, from the map pop-ups, or by pasting their IDs here.')}</p>`}`);
+ p.querySelector('#rtAdd').onclick=()=>{
+  const toks=p.querySelector('#rtPaste').value.split(/[^A-Za-zА-Яа-я0-9_-]+/).filter(Boolean);
+  let add=0;const miss=[];
+  for(const tk of toks){const g=findByToken(tk);if(!g){miss.push(tk);continue;}const k=L[g[0]].k;if(!inRoute(k)){ROUTE.keys.push(k);add++;}}
+  saveRoute();search();openRoute();
+  const m=$('#rtMsg');if(m)m.innerHTML=`<div class="msg${miss.length?'':' ok'}">${T('Добавени','Added')}: ${add}${miss.length?` · ${T('не са намерени','not found')}: ${esc(miss.slice(0,10).join(', '))}${miss.length>10?' …':''}`:''}</div>`;};
+ const q2=(s)=>p.querySelector(s);
+ if(q2('#rtOpt'))q2('#rtOpt').onclick=()=>{
+  const go=start=>{const done=routeRecs().filter(isDone),todo=routeRecs().filter(r=>!isDone(r));
+   ROUTE.keys=[...done,...optimize(todo,start)].map(r=>r.k);saveRoute();search();openRoute();toast(T('Подредено от ','Ordered from ')+(start?T('твоето място','your location'):T('първия обект','the first site')));};
+  if(me)go(me);else if(navigator.geolocation){toast(T('Търся местоположението…','Finding your location…'));
+   navigator.geolocation.getCurrentPosition(pos=>{me={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:pos.coords.accuracy};go(me);},()=>go(null),{enableHighAccuracy:true,timeout:10000,maximumAge:60000});}
+  else go(null);};
+ if(q2('#rtMap'))q2('#rtMap').onclick=()=>openMap('route');
+ if(q2('#rtClr'))q2('#rtClr').onclick=e=>{const b=e.currentTarget;if(!b.dataset.sure){b.dataset.sure=1;b.textContent=T('Натисни пак','Tap again');b.classList.add('danger');return;}
+  ROUTE={keys:[],done:[]};saveRoute();search();closeSheet();toast(T('Маршрутът е изчистен','Route cleared'));};
+ p.querySelector('.rtlist')?.addEventListener('click',e=>{const li=e.target.closest('li');if(!li)return;const k=li.dataset.k,i=ROUTE.keys.indexOf(k);
+  const mv=e.target.closest('[data-mv]');if(mv){const j=i+(+mv.dataset.mv);if(j<0||j>=ROUTE.keys.length)return;[ROUTE.keys[i],ROUTE.keys[j]]=[ROUTE.keys[j],ROUTE.keys[i]];saveRoute();openRoute();return;}
+  if(e.target.closest('[data-rm]')){toggleRoute(k);search();openRoute();}});
+ p.querySelector('.rtlist')?.addEventListener('change',e=>{const cb=e.target.closest('[data-done]');if(!cb)return;const k=cb.closest('li').dataset.k;
+  ROUTE.done=cb.checked?[...new Set([...ROUTE.done,k])]:ROUTE.done.filter(x=>x!==k);saveRoute();openRoute();});
+}
+function drawRouteMap(fit){
+ const rs=routeRecs();const pts=[];if(me)pts.push([me.lat,me.lon]);
+ const left=rs.filter(r=>!isDone(r));
+ if(me&&left.length)LF.polyline([[me.lat,me.lon],[left[0].lat,left[0].lon]],{color:'#1a73e8',weight:3,dashArray:'4 8',opacity:.8}).addTo(mapLayer);
+ if(left.length>1)LF.polyline(left.map(r=>[r.lat,r.lon]),{color:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#0a6e78',weight:4,opacity:.85}).addTo(mapLayer);
+ rs.forEach((r,i)=>{pts.push([r.lat,r.lon]);
+  LF.marker([r.lat,r.lon],{icon:LF.divIcon({className:'',html:`<div class="rnum${isDone(r)?' done':''}">${i+1}</div>`,iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-12]}),zIndexOffset:isDone(r)?0:500}).bindPopup(popupHtml(r,null)).addTo(mapLayer);});
+ if(me)LF.marker([me.lat,me.lon],{icon:LF.divIcon({className:'',html:'<div class="mewrap"><span class="ring"></span><span class="medot"></span></div>',iconSize:[56,56],iconAnchor:[28,28]}),zIndexOffset:2000,interactive:false}).addTo(mapLayer);
+ $('#mapTitle').innerHTML=`${T('Маршрут','Route')} · <b>${num(rs.length)}</b> · ~${fmtKm(routeKm(left,me))}`;
+ if(fit&&pts.length){if(pts.length>1)MAP.fitBounds(pts,{padding:[40,40],maxZoom:16});else MAP.setView(pts[0],14);}
+}
+$('#rbOpen').onclick=openRoute;
 
 /* ====================== filters ====================== */
 // within one field the ticked values are OR-ed; different fields are AND-ed; everything combines with the search
@@ -919,6 +1068,7 @@ list.addEventListener('click',async e=>{
  if(o&&art){const k=+art.dataset.k;sel.set(res[k].g,+o.dataset.p);art.outerHTML=card(k);return;}
  const nb=e.target.closest('[data-near]');
  if(nb){const r=L[KEYI.get(nb.dataset.near)];if(!r)return;stopMe();near={type:'site',k:r.k,lat:r.lat,lon:r.lon,id:r.id,name:r.name};q.value='';curTerms=[];search();window.scrollTo(0,0);return;}
+ const rtb=e.target.closest('.rtb');if(rtb){toggleRoute(rtb.dataset.rt);rerenderCard(rtb.dataset.rt);toast(inRoute(rtb.dataset.rt)?T('Добавен в маршрута','Added to route'):T('Махнат от маршрута','Removed from route'));return;}
  const act=e.target.closest('[data-act]');if(act){openActions(act.dataset.act);return;}
  const b=e.target.closest('.cp');if(!b)return;
  try{await navigator.clipboard.writeText(b.dataset.ll);b.innerHTML=IC.ok;b.classList.add('ok');setTimeout(()=>{b.innerHTML=IC.cp;b.classList.remove('ok')},1500);}
