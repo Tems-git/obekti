@@ -404,9 +404,14 @@ details.det[open]{background:var(--surface-2)}
 .meta .cp.ok{color:var(--accent)}
 .meta .cp:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .meta .nb{margin-left:0;font-size:13px}
-.b{display:grid;grid-template-columns:1fr 1fr 48px;gap:8px;margin-top:0;padding-top:10px;border-top:1px solid var(--line)}
+.b{display:grid;grid-template-columns:1fr 1fr 46px 46px;gap:8px;margin-top:0;padding-top:10px;border-top:1px solid var(--line)}
 .b a,.b button{min-height:44px;border-radius:12px;font-size:14.5px}
-.b .rtb{width:48px;flex:none!important}
+.b .rtb,.b .cp{width:46px;flex:none!important}
+.ownrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:-2px}
+.ownrow .own{font-size:11px;padding:3px 8px;border-radius:6px}
+.ownrow .dist{font-size:11.5px;padding:3px 8px;border-radius:6px}
+.c>.row2.colo{margin-top:-2px}
+.hd .nm .stype{margin-left:8px;vertical-align:2px}
 .gm{box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 30%,transparent)}
 @media (hover:hover){.gm:hover{filter:brightness(1.07)}.wz:hover{filter:brightness(.97)}}
 .c.origin{box-shadow:0 0 0 2px var(--accent),0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent)}
@@ -608,7 +613,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='32';
+const APP_VER='33';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -725,15 +730,15 @@ function card(k){
  // header: status dot, ID (coloured by colocation role), name, owner and type, distance, menu
  let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t">`+
   `<span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${oa?`<span class="onair" title="On Air: ${esc(oa)}" role="img" aria-label="On Air"></span>`:''}${esc(r.id)}</span>`+
-  `<div class="hd"><span class="nm">${hl(r.name||'')}${lock}</span>`+
-  `<span class="sub2">`+(o?(isOrigin?`<span class="dist origin">${T('избран','selected')}</span>`:`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+`${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span></div>`+
+  `<div class="hd"><span class="nm">${hl(r.name||'')}${lock}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span></div>`+
   `<button class="more-btn" type="button" data-act="${esc(r.k)}" aria-label="Действия">${IC.dots}</button></div>`;
+ if(r.own||o)h+=`<div class="ownrow">${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}`+(o?(isOrigin?`<span class="dist origin">${T('избран','selected')}</span>`:`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+`</div>`;
+ if(co.role!=='solo')h+=`<div class="row2 colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&sameId(v)?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
  // info rows, each with its own icon
  h+=`<div class="rows">`;
  if(ad)h+=`<div class="row2 ad">${IC_PIN}<span>${hl(ad)}${note?`<span class="note">${hl(note)}</span>`:''}</span></div>`;
  {const cv=contactDefs().map(d=>String(xs0[d.id]??'').trim()).filter(Boolean);
   if(cv.length)h+=`<div class="row2 cont" data-raw>${IC_PERSON}<span>${cv.map(v=>linkPhones(v)).join(' · ')}</span></div>`;}
- if(co.role!=='solo')h+=`<div class="row2 colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&sameId(v)?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
  if(g.length>1)h+=`<div class="row2 opts" role="group" aria-label="Опции">${IC_LAYERS}<span class="optw"><span class="lbl">Опция</span>`+
    g.map(p=>`<button class="opt${it.hits&&it.hits.has(p)?' hit':''}" type="button" data-p="${p}" aria-pressed="${p===i}">${L[p].opt||1}</button>`).join('')+`</span></div>`;
  h+=`</div>`;
@@ -745,12 +750,13 @@ function card(k){
  const det=LD.filter(d=>!d.badge&&has(d)&&!coloIds.has(d.id));
  if(det.length)h+=`<details class="det"><summary>Детайли · ${det.length}</summary><dl>${det.map(d=>`<dt>${esc(d.name)}</dt><dd>${fmtVal(d,xs[d.id])}</dd>`).join('')}</dl></details>`;
  // coordinates with copy, nearby link
- h+=`<div class="meta"><button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите" title="${T('Копирай координатите','Copy coordinates')}"><span class="co">${ll}</span>${IC.cp}</button>`+
+ h+=`<div class="meta"><span class="co">${ll}</span>`+
    (isOrigin?'':`<button class="nb" type="button" data-near="${esc(r.k)}">${IC.near}Наблизо</button>`)+`</div>`;
  // actions
  h+=`<div class="b"><a class="gm" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">${IC.map}Google Maps</a>`+
    `<a class="wz" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>${IC.nav}Waze</a>`+
-   `<button class="rtb${inRoute(r.k)?' on':''}" data-rt="${esc(r.k)}" type="button" aria-label="${inRoute(r.k)?T('Махни от маршрута','Remove from route'):T('Добави в маршрута','Add to route')}" title="${inRoute(r.k)?T('В маршрута','In route'):T('Добави в маршрута','Add to route')}">${inRoute(r.k)?IC.rtOn:IC.rt}</button></div></article>`;
+   `<button class="rtb${inRoute(r.k)?' on':''}" data-rt="${esc(r.k)}" type="button" aria-label="${inRoute(r.k)?T('Махни от маршрута','Remove from route'):T('Добави в маршрута','Add to route')}" title="${inRoute(r.k)?T('В маршрута','In route'):T('Добави в маршрута','Add to route')}">${inRoute(r.k)?IC.rtOn:IC.rt}</button>`+
+   `<button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите" title="${T('Копирай координатите','Copy coordinates')}">${IC.cp}</button></div></article>`;
  return h;
 }
 /* special columns, recognised by their header: access (red lock), host and guests (colocation line) */
