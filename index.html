@@ -102,6 +102,31 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 .nearbar button.mapbtn{margin-left:auto;background:var(--accent);color:var(--accent-ink)}
 .nearbar button.mapbtn+button{margin-left:0}
 .nearbar.err .mapbtn{display:none}
+.mhelp{margin-left:auto;width:36px;height:36px;padding:0;border-radius:50%;font-weight:700;flex:none}
+.lgtabs{display:flex;gap:6px;position:sticky;top:-8px;background:var(--surface);padding:6px 0;z-index:1}
+.lgtabs button{flex:1;font:600 13.5px var(--sans);padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);cursor:pointer}
+.lgs{display:flex;flex-direction:column;gap:2px;scroll-margin-top:52px}
+.lgs h3{margin:8px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.lg{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.lgs h3+.lg{border-top:0}
+.lgv{display:flex;justify-content:center;align-items:center;min-height:28px}
+.lgt{font-size:14px;line-height:1.4;color:var(--muted)}
+.lgt b{color:var(--fg);font-weight:600}
+.lgt .own{font-size:11px;padding:2px 7px;border-radius:6px;display:inline-block;margin:2px 2px 0 0}
+.lgdot{display:inline-block;width:16px;height:16px;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.lgmulti{display:flex;gap:2px}
+.lgme{position:relative;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(26,115,232,.18)}
+.lgme .medot{width:16px;height:16px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.lgv .rnum{display:inline-block}
+.lgarw{position:absolute;bottom:50%;left:50%;margin-left:-7px;margin-bottom:5px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.lgme{margin-top:12px}
+.lgv .id{font-size:12px;padding:5px 7px}
+.lgv .id .onair{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.9)}
+.lgic{color:var(--accent);display:grid}
+.lgic svg{width:20px;height:20px}
+.lgbtn{width:40px;height:34px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--line);color:var(--accent)}
+.lgbtn.gm{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lgbtn.wz{background:var(--waze-soft);color:var(--waze);border-color:transparent}
 .mapview{position:fixed;inset:0;z-index:25;background:var(--bg);display:flex;flex-direction:column}
 .mapbar{display:flex;align-items:center;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:10px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line)}
 .mtitle{font-size:14px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -472,7 +497,7 @@ details.det[open]{background:var(--surface-2)}
 </header>
 <main><div class="wrap" id="list"></div></main>
 <div class="mapview" id="mapView" hidden>
-  <div class="mapbar"><button class="btn sec small" type="button" id="mapBack">Списък</button><span class="mtitle" id="mapTitle"></span></div>
+  <div class="mapbar"><button class="btn sec small" type="button" id="mapBack">Списък</button><span class="mtitle" id="mapTitle"></span><button class="btn sec small mhelp" type="button" id="mapHelp" aria-label="Легенда">?</button></div>
   <div id="map"></div>
 </div>
 <div class="sheet" id="sheet" hidden></div>
@@ -546,7 +571,7 @@ const EN={
 'Обновени (по-нова промяна в пакета)':'Updated (newer change in the package)','Изтрити от колегата':'Deleted by the colleague','Твоите по-нови промени, които остават':'Your newer changes, which stay',
 'Полета: нови или променени':'Fields: new or changed','Нищо от твоята база не се губи. При един и същ обект остава по-новата промяна. След сливането можеш да споделиш обновения пакет.':'Nothing in your database is lost. For the same site the newer change wins. After merging you can share the updated package.',
 'Слей':'Merge','Няма нищо ново':'Nothing new','Хранилището на браузъра е недостъпно':'Browser storage is unavailable','Провери дали не си в частен режим (Private) на Safari.':'Check that Safari is not in Private mode.',
-'Език':'Language','Отвори':'Open','Празните клетки изтриват стойността':'Empty cells clear the value','Ако си изтрил нещо в Excel (например Site Access), то се изтрива и тук. Важи само за колоните, които ги има във файла.':'If you deleted something in Excel (for example Site Access), it is deleted here too. Only for columns that are in the file.','Колокация':'Colocation','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
+'Език':'Language','Легенда':'Legend','Отвори':'Open','Празните клетки изтриват стойността':'Empty cells clear the value','Ако си изтрил нещо в Excel (например Site Access), то се изтрива и тук. Важи само за колоните, които ги има във файла.':'If you deleted something in Excel (for example Site Access), it is deleted here too. Only for columns that are in the file.','Колокация':'Colocation','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
 };
 const ENRX=[
  [/^Детайли · (\d+)$/,'Details · $1'],
@@ -613,7 +638,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='34';
+const APP_VER='35';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -662,6 +687,7 @@ const IC={
  down:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
  rt:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6"/><path d="M18 2.5v5M15.5 5h5"/></svg>',
  rtOn:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h4"/><path d="M15.5 5l2 2 3.5-4"/></svg>',
+ help:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.5-2.7 4"/><circle cx="12" cy="17.3" r=".6" fill="currentColor"/></svg>',
  lock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>'
 };
 
@@ -1055,6 +1081,42 @@ function drawRouteMap(fit){
 }
 $('#rbOpen').onclick=openRoute;
 
+/* ====================== legend / help ====================== */
+function openHelp(focus){
+ const cs=getComputedStyle(document.documentElement);
+ const own=OPS.filter(o=>o!=='Без собственик').slice(0,5);
+ const li=(vis,txt)=>`<div class="lg"><span class="lgv">${vis}</span><span class="lgt">${txt}</span></div>`;
+ const dot=(c,extra='')=>`<span class="lgdot" style="background:${c};${extra}"></span>`;
+ const sec=(id,title,body)=>`<section class="lgs" id="lg-${id}"><h3>${title}</h3>${body}</section>`;
+ const mapSec=sec('map',T('Точки на картата','Map dots'),
+  li('<span class="lgme"><svg class="lgarw" viewBox="0 0 24 32" width="14" height="19"><path d="M12 30.5L1.8 17.5H7.6V1.5H16.4V17.5H22.2Z" fill="#1a73e8" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg><span class="medot"></span></span>',T('<b>Ти</b> – синя точка със стрелка; синият кръг е точността на местоположението.','<b>You</b> – blue dot with an arrow; the blue circle is the location accuracy.'))+
+  li(`<svg viewBox="0 0 40 52" width="22" height="28"><path d="M20 51C20 51 3 31 3 19a17 17 0 0 1 34 0c0 12-17 32-17 32z" fill="#0a6e78" stroke="#fff" stroke-width="3"/></svg>`,T('<b>Избраният обект</b> при „Наблизо“ – тюркоазен маркер с номера му.','<b>The selected site</b> in “Nearby” – teal pin with its ID.'))+
+  li(`<span class="lgmulti">${(own.length?own:['A1 Operator BG']).map(o=>dot(cs.getPropertyValue('--'+(OPCLS.get(o)||'p5')).trim(),'border:2px solid #fff')).join('')}</span>`,T('<b>Обектите</b> – цветни точки; цветът е собственикът','<b>Sites</b> – coloured dots; the colour is the owner')+(own.length?': '+own.map(o=>`<span class="own ${OPCLS.get(o)||'p5'}">${esc(o)}</span>`).join(' '):'.'))+
+  li('<span class="rnum">1</span>',T('<b>Маршрут</b> – номерата са редът на обиколката; сивите са посетени. Плътната линия е маршрутът, пунктирът – от теб до първия обект.','<b>Route</b> – numbers are the visiting order; grey ones are visited. The solid line is the route, the dashed one goes from you to the first site.')));
+ const cardSec=sec('card',T('На картата на обекта','On a site card'),
+  li('<span class="id role-host">SOF0001</span>',T('<b>Зелен номер</b> – A1 или ETS са домакин и на обекта има гости.','<b>Green ID</b> – A1 or ETS are the host and the site has guests.'))+
+  li('<span class="id role-guest">SOF0001</span>',T('<b>Оранжев номер</b> – ние сме гост: в Host е друг оператор или A1/ETS са в Guest колоните.','<b>Orange ID</b> – we are a guest: another operator is the host, or A1/ETS are in a Guest column.'))+
+  li('<span class="id role-solo">SOF0001</span>',T('<b>Тъмен номер</b> – самостоятелен обект, без колокация.','<b>Dark ID</b> – standalone site, no colocation.'))+
+  li('<span class="id role-solo"><span class="onair"></span>ID</span>',T('<b>Зелена точка</b> в номера – обектът е On Air.','<b>Green dot</b> in the ID – the site is On Air.'))+
+  li(`<span class="acclock">${IC_LOCK}</span>`,T('<b>Червен катинар</b> – нужен е достъп (колона Site Access). Подробностите са в „Детайли“.','<b>Red lock</b> – access is required (Site Access column). Details are under “Details”.'))+
+  li('<span class="stype">Rooftop</span>',T('<b>Етикет до името</b> – типът на обекта (Site Type).','<b>Tag next to the name</b> – the site type (Site Type).'))+
+  li(`<span class="lgic">${IC_COLO}</span>`,T('<b>Колокация</b> – домакин / гости. Удебелено е нашият номер или оператор.','<b>Colocation</b> – host / guests. Bold is our ID or operator.'))+
+  li(`<span class="lgic">${IC_PERSON}</span>`,T('<b>Контакт</b> – лице, телефон и имейл. Телефонът звъни, имейлът отваря пощата.','<b>Contact</b> – person, phone and e-mail. Tap the phone to call, the e-mail to write.'))+
+  li(`<span class="lgic">${IC_LAYERS}</span>`,T('<b>Опции</b> – един обект с няколко кандидат-места; бутоните 1, 2… сменят адреса и координатите.','<b>Options</b> – one site with several candidate locations; buttons 1, 2… switch address and coordinates.')));
+ const btnSec=sec('buttons',T('Бутони','Buttons'),
+  li(`<span class="lgbtn gm">${IC.map}</span>`,T('<b>Google Maps</b> – показва точката.','<b>Google Maps</b> – shows the point.'))+
+  li(`<span class="lgbtn wz">${IC.nav}</span>`,T('<b>Waze</b> – показва точката; навигацията тръгва, когато натиснеш маршрут.','<b>Waze</b> – shows the point; navigation starts when you choose the route.'))+
+  li(`<span class="lgbtn">${IC.rt}</span>`,T('<b>Маршрут</b> – добавя обекта в обиколката. Долу се появява лента с маршрута.','<b>Route</b> – adds the site to your trip. A route bar appears at the bottom.'))+
+  li(`<span class="lgbtn">${IC.cp}</span>`,T('<b>Копирай</b> координатите.','<b>Copy</b> the coordinates.'))+
+  li(`<span class="lgbtn">${IC.near}</span>`,T('<b>Наблизо</b> – обектите около този обект, по разстояние.','<b>Nearby</b> – sites around this one, by distance.'))+
+  li(`<span class="lgbtn">${IC.nav}</span>`,T('<b>До мен</b> (горе, до търсенето) – обектите около теб; оттам и бутона „Карта“.','<b>Near me</b> (top, next to search) – sites around you; the “Map” button is there.'))+
+  li('<span class="lgbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4 2v-8.5z"/></svg></span>',T('<b>Филтри</b> – район, колокация, населено място и всяка колона от файла.','<b>Filters</b> – area, colocation, town and every column of the file.')));
+ const p=sheet(T('Какво означава','What it means'),`<div class="lgtabs"><button type="button" data-lg="map">${T('Карта','Map')}</button><button type="button" data-lg="card">${T('Обект','Site')}</button><button type="button" data-lg="buttons">${T('Бутони','Buttons')}</button></div>${mapSec}${cardSec}${btnSec}`);
+ p.querySelector('.lgtabs').onclick=e=>{const b=e.target.closest('[data-lg]');if(b)p.querySelector('#lg-'+b.dataset.lg).scrollIntoView({behavior:'smooth',block:'start'});};
+ if(focus)setTimeout(()=>p.querySelector('#lg-'+focus)?.scrollIntoView({block:'start'}),30);
+}
+$('#mapHelp').onclick=()=>{const m=$('#mapView');m.style.zIndex='19';openHelp('map');const restore=new MutationObserver(()=>{if($('#sheet').hidden){m.style.zIndex='';restore.disconnect();}});restore.observe($('#sheet'),{attributes:true,attributeFilter:['hidden']});};
+
 /* ====================== filters ====================== */
 // within one field the ticked values are OR-ed; different fields are AND-ed; everything combines with the search
 let FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{}};
@@ -1189,6 +1251,7 @@ function openMenu(){
  </div>
  <div class="gl">Настройки</div>
  <div class="group">
+  <button class="row" type="button" data-go="help">${IC.help}<span>${T('Какво означава','What it means')}<small>${T('Цветове, точки на картата, иконки и бутони','Colours, map dots, icons and buttons')}</small></span></button>
   <button class="row" type="button" data-go="fields">${IC.fields}<span>Полета на обектите<small>${liveDefs().map(d=>esc(d.name)).join(', ')||'Няма допълнителни полета'}</small></span></button>
  </div>
  <div class="fsec"><h3>Език</h3><div class="seg" id="langSeg"><button type="button" data-lang="bg" aria-pressed="${LANG==='bg'}">Български</button><button type="button" data-lang="en" aria-pressed="${LANG==='en'}">English</button></div></div>
@@ -1206,6 +1269,7 @@ function openSource(what){
  else if(what==='export')openExport();
  else if(what==='wipe')openWipe();
  else if(what==='fields')openFields();
+ else if(what==='help')openHelp();
 }
 function openWipe(){
  const p=sheet('Изтриване на всички данни',`<p class="sub">Ще изтрие всички ${num(L.length)} точки от този телефон. Ако нямаш пакет, няма да можеш да ги върнеш.</p>
