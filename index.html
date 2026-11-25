@@ -162,6 +162,8 @@ main{padding-top:14px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)
 .id.role-colo{background:var(--p1);color:#fff}
 .stype{display:inline-block;vertical-align:2px;margin-left:8px;font:600 11px/1 var(--sans);letter-spacing:.03em;padding:4px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted);background:var(--surface-2)}
 .colo i.me{font-weight:700}
+.colo.cont span{color:var(--fg)}
+.colo a{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
 .rdot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px;padding:0!important}
 .colo{display:flex;align-items:flex-start;gap:6px;font-size:12.5px;line-height:1.35;color:var(--muted);margin-top:-2px}
 .colo svg{flex:none;color:var(--accent);margin-top:1px}
@@ -439,7 +441,7 @@ const EN={
 'Обновени (по-нова промяна в пакета)':'Updated (newer change in the package)','Изтрити от колегата':'Deleted by the colleague','Твоите по-нови промени, които остават':'Your newer changes, which stay',
 'Полета: нови или променени':'Fields: new or changed','Нищо от твоята база не се губи. При един и същ обект остава по-новата промяна. След сливането можеш да споделиш обновения пакет.':'Nothing in your database is lost. For the same site the newer change wins. After merging you can share the updated package.',
 'Слей':'Merge','Няма нищо ново':'Nothing new','Хранилището на браузъра е недостъпно':'Browser storage is unavailable','Провери дали не си в частен режим (Private) на Safari.':'Check that Safari is not in Private mode.',
-'Език':'Language','Колокация':'Colocation','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
+'Език':'Language','Празните клетки изтриват стойността':'Empty cells clear the value','Ако си изтрил нещо в Excel (например Site Access), то се изтрива и тук. Важи само за колоните, които ги има във файла.':'If you deleted something in Excel (for example Site Access), it is deleted here too. Only for columns that are in the file.','Колокация':'Colocation','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
 };
 const ENRX=[
  [/^Детайли · (\d+)$/,'Details · $1'],
@@ -506,7 +508,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='28';
+const APP_VER='29';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -619,12 +621,14 @@ function card(k){
  const co=coloOf(r),stype=xval(r,RX_TYPE).find(Boolean)||'';
  let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t">${(()=>{const oa=xval(r,RX_ONAIR).find(Boolean);return oa?`<span class="onair" title="On Air: ${esc(oa)}" role="img" aria-label="On Air"></span>`:'';})()}<span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${esc(r.id)}</span><span class="nm">${hl(r.name||'')}${lock}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span>`+
   `<button class="more-btn" type="button" data-act="${esc(r.k)}" aria-label="Действия">${IC.dots}</button></div>`;
+ {const cv=contactDefs().map(d=>String(xs0[d.id]??'').trim()).filter(Boolean);
+  if(cv.length)h+=`<div class="colo cont" data-raw>${IC_PERSON}<span>${cv.map(v=>linkPhones(v)).join(' · ')}</span></div>`;}
  if(co.role!=='solo')h+=`<div class="colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&String(v).toUpperCase().replace(/\s+/g,'')===String(r.id).toUpperCase().replace(/\s+/g,'')?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
  if(g.length>1)h+=`<div class="opts" role="group" aria-label="Опции"><span class="lbl">Опция</span>`+
    g.map(p=>`<button class="opt${it.hits&&it.hits.has(p)?' hit':''}" type="button" data-p="${p}" aria-pressed="${p===i}">${L[p].opt||1}</button>`).join('')+`</div>`;
  if(ad)h+=`<div class="ad">${hl(ad)}${note?`<span class="note">${hl(note)}</span>`:''}</div>`;
  const xs=r.x||{},LD=liveDefs(),has=d=>String(xs[d.id]??'').trim()!=='';
- const coloIds=new Set([...defBy(RX_HOST),...defBy(RX_GUEST),...defBy(RX_TYPE)].map(d=>d.id));
+ const coloIds=new Set([...defBy(RX_HOST),...defBy(RX_GUEST),...defBy(RX_TYPE),...contactDefs()].map(d=>d.id));
  const tags=LD.filter(d=>d.badge&&has(d)&&!coloIds.has(d.id));
  if(tags.length)h+=`<div class="tags">${tags.map(d=>{const w=d.warn&&String(xs[d.id])!==String((d.opts||[])[0]??'');
    return `<span class="tag${w?' warn':''}" title="${esc(d.name)}">${w?IC.key:''}${hl(d.type==='yesno'?d.name+': '+xs[d.id]:xs[d.id])}</span>`;}).join('')}</div>`;
@@ -643,6 +647,8 @@ const RX_ACCESS=/^(site\s*)?access$|^достъп$/i, RX_HOST=/^(site\s*)?host$|
  RX_GUEST=/^((first|second|third|fourth|fifth|1st|2nd|3rd|4th|5th)\s+)?guest(\s*\d+)?$|^(първи|втори|трети|четвърти)?\s*гост(\s*\d+)?$/i;
 const defBy=re=>liveDefs().filter(d=>re.test(d.name.trim()));
 const RX_TYPE=/^(site\s*)?type$|^тип(\s+на\s+обекта)?$/i;
+const RX_CPHONE=/phone|телефон|^тел\.?$|gsm|mobile|мобилен/i, RX_CNAME=/contact|контакт|лице\s*за\s*връзка|отговорник/i;
+const contactDefs=()=>liveDefs().filter(d=>RX_CNAME.test(d.name)||(RX_CPHONE.test(d.name)&&!RX_ACCESS.test(d.name)));
 const RX_ONAIR=/^on[\s-]*air$/i, RX_LISTF=/construction\s*type|^(site\s*)?type$/i;
 const xval=(r,re)=>defBy(re).map(d=>String((r.x||{})[d.id]??'').trim());
 // host: the Host column names this site (its ID, or its owner); guest: one of the Guest columns does; solo: no colocation
@@ -662,6 +668,7 @@ function fmtVal(d,v){v=String(v);
  if(d.type==='phone'){const tel=v.replace(/[^\d+]/g,'');return tel.length>=6?`<a href="tel:${esc(tel)}">${hl(v)}</a>`:hl(v);}
  return linkPhones(v);}
 const IC_LOCK='<svg class="lockic" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2.5" fill="currentColor"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.7" fill="#fff"/></svg>';
+const IC_PERSON='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
 const IC_COLO='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 21 11 9M15.5 21 13 9M9.6 16h4.8"/><path d="M12 9V5"/><path d="M6.5 4.5a7 7 0 0 0 0 9M17.5 4.5a7 7 0 0 1 0 9"/></svg>';
 const ILL_HERO=`<svg class="ill" viewBox="0 0 360 196" role="img" aria-label="Базова станция с антени и радиорелейна връзка"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--il-sky1)"/><stop offset="1" style="stop-color:var(--il-sky2)"/></linearGradient></defs>
 <rect width="360" height="196" fill="url(#sky)"/>
@@ -1165,8 +1172,9 @@ function parseRows(){
   const gk=id.toUpperCase();
   if(!opt){const n=(seen.get(gk)||0)+1;seen.set(gk,n);opt=n>1?n:null;}
   const rec={id,opt:opt||null,x:{}};if(hasC){rec.lat=Math.round(lat*1e6)/1e6;rec.lon=Math.round(lon*1e6)/1e6;}
-  for(const f of ['name','addr','own']){const v=String(cell(row,f)??'').trim();if(v)rec[f]=v;}
-  for(const k of Object.keys(m)){if(!k.startsWith('x:'))continue;let v=String(row[m[k]]??'').trim();if(!v)continue;
+  rec.clear=[];
+  for(const f of ['name','addr','own']){if(m[f]===undefined)continue;const v=String(cell(row,f)??'').trim();if(v)rec[f]=v;else rec.clear.push(f);}
+  for(const k of Object.keys(m)){if(!k.startsWith('x:'))continue;let v=String(row[m[k]]??'').trim();if(!v){rec.clear.push(k);continue;}
    const d=DEFS.find(x=>'x:'+x.id===k)||(IMP.pending||[]).find(x=>'x:'+x.id===k);
    if(d&&d.type==='yesno')v=/^(да|yes|y|1|true|x|✓)$/i.test(v)?'Да':/^(не|no|n|0|false)$/i.test(v)?'Не':v;
    rec.x[k.slice(2)]=v;}
@@ -1215,8 +1223,11 @@ function openTablePreview(){
  const pr=IMP.parsed,map=new Map(ALL.map(r=>[r.k,r]));
  const add=[],chg=[];let eq=0,noc=0;
  for(const r0 of pr.recs){const c=map.get(r0.k);
-  if(!c||c.del){if(r0.lat===undefined){noc++;continue;}add.push({name:'',addr:'',own:'',...r0});continue;}
+  if(!c||c.del){if(r0.lat===undefined){noc++;continue;}const n={name:'',addr:'',own:'',...r0};delete n.clear;add.push(n);continue;}
   const r={...c,...r0,x:{...(c.x||{}),...r0.x}};
+  // a cell emptied in the file empties the value in the app (only for columns that are in the file)
+  if(IMP.clearEmpty!==false)for(const k of r0.clear||[]){if(k.startsWith('x:'))delete r.x[k.slice(2)];else r[k]='';}
+  delete r.clear;
   if(same(c,r))eq++;else chg.push(r);}
  // objects missing from the file are offered for removal only when the file looks like a full list
  const keys=new Set(pr.recs.map(r=>r.k));
@@ -1230,8 +1241,10 @@ function openTablePreview(){
  ${chg.length?`<p class="sub">Променени: ${esc(chg.slice(0,8).map(r=>r.id).join(', '))}${chg.length>8?' и още '+(chg.length-8):''}</p>`:''}
  ${miss.length?`<p class="sub">Липсващи: ${esc(miss.slice(0,8).map(r=>r.id).join(', '))}${miss.length>8?' и още '+(miss.length-8):''}</p>
   <label class="check"><input type="checkbox" id="pRm"><span>Изтрий липсващите ${num(miss.length)}<br><small class="sub">По подразбиране остават. Изтрий ги само ако файлът е пълният актуален списък.</small></span></label>`:''}
+ <label class="check"><input type="checkbox" id="pClr" ${IMP.clearEmpty!==false?'checked':''}><span>Празните клетки изтриват стойността<br><small class="sub">Ако си изтрил нещо в Excel (например Site Access), то се изтрива и тук. Важи само за колоните, които ги има във файла.</small></span></label>
  <div class="actions"><button class="btn sec" type="button" id="pBack">Колони</button><button class="btn" type="button" id="pGo" ${add.length+chg.length+miss.length?'':'disabled'}>Приложи</button></div>`);
  p.querySelector('#pBack').onclick=openMapping;
+ p.querySelector('#pClr').onchange=e=>{IMP.clearEmpty=e.target.checked;openTablePreview();};
  p.querySelector('#pGo').onclick=async()=>{
   const t=now(),by=META.author,idx=new Map(ALL.map((r,i)=>[r.k,i]));
   for(const r of [...add,...chg]){const rec={...r,u:t,by,del:0};delete rec.op;const i=idx.get(r.k);if(i===undefined){idx.set(r.k,ALL.length);ALL.push(rec);}else ALL[i]=rec;}
