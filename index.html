@@ -154,9 +154,15 @@ main{padding-top:14px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)
 .id{font:600 13.5px/1 var(--mono);letter-spacing:.02em;padding:6px 8px 6px 7px;border-radius:7px;background:var(--fg);color:var(--surface);flex:none;display:inline-flex;align-items:center;gap:5px}
 .nm{font-weight:600;font-size:17px;letter-spacing:-.005em;min-width:0;overflow-wrap:anywhere;flex:1}
 .acclock{display:inline-flex;vertical-align:-2px;margin-left:6px;color:#d93025}
+.id.role-host{background:var(--accent);color:var(--accent-ink)}
+.id.role-guest{background:#c26a00;color:#fff}
+@media (prefers-color-scheme:dark){.id.role-guest{background:#f0a23c;color:#2a1700}}
+.id.role-colo{background:var(--p1);color:#fff}
+.stype{display:inline-block;vertical-align:2px;margin-left:8px;font:600 11px/1 var(--sans);letter-spacing:.03em;padding:4px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted);background:var(--surface-2)}
+.colo i.me{font-weight:700}
+.rdot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px;padding:0!important}
 .colo{display:flex;align-items:flex-start;gap:6px;font-size:12.5px;line-height:1.35;color:var(--muted);margin-top:-2px}
 .colo svg{flex:none;color:var(--accent);margin-top:1px}
-.colo b{font-weight:600;color:var(--fg)}
 .colo i{font-style:normal;color:var(--fg)}
 .more-btn{flex:none;width:32px;height:32px;margin:-4px -6px -4px 0;border:0;background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;display:grid;place-items:center}
 .more-btn:hover{background:var(--surface-2)}
@@ -431,7 +437,7 @@ const EN={
 'Обновени (по-нова промяна в пакета)':'Updated (newer change in the package)','Изтрити от колегата':'Deleted by the colleague','Твоите по-нови промени, които остават':'Your newer changes, which stay',
 'Полета: нови или променени':'Fields: new or changed','Нищо от твоята база не се губи. При един и същ обект остава по-новата промяна. След сливането можеш да споделиш обновения пакет.':'Nothing in your database is lost. For the same site the newer change wins. After merging you can share the updated package.',
 'Слей':'Merge','Няма нищо ново':'Nothing new','Хранилището на браузъра е недостъпно':'Browser storage is unavailable','Провери дали не си в частен режим (Private) на Safari.':'Check that Safari is not in Private mode.',
-'Език':'Language','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
+'Език':'Language','Колокация':'Colocation','Карта':'Map','Най-близки до теб ·':'Nearest to you ·','Списък':'List','Картата не се зареди. Отвори приложението веднъж с интернет.':'The map did not load. Open the app once with internet.','Базова станция с антени и радиорелейна връзка':'Base station with antennas and a microwave link','Добави към началния екран':'Add to Home Screen'
 };
 const ENRX=[
  [/^Детайли · (\d+)$/,'Details · $1'],
@@ -498,7 +504,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='26';
+const APP_VER='27';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -608,16 +614,15 @@ function card(k){
  const isOrigin=near&&near.type==='site'&&g.some(p=>L[p].k===near.k);
  const xs0=r.x||{},acc=defBy(RX_ACCESS).map(d=>String(xs0[d.id]??'').trim()).find(Boolean);
  const lock=acc?`<span class="acclock" title="${esc((LANG==='en'?'Access: ':'Достъп: ')+acc)}" role="img" aria-label="${esc((LANG==='en'?'Access required: ':'Нужен достъп: ')+acc)}">${IC_LOCK}</span>`:'';
- let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t"><span class="id">${esc(r.id)}</span><span class="nm">${hl(r.name||'')}${lock}</span>`+
+ const co=coloOf(r),stype=xval(r,RX_TYPE).find(Boolean)||'';
+ let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t"><span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${esc(r.id)}</span><span class="nm">${hl(r.name||'')}${lock}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span>`+
   `<button class="more-btn" type="button" data-act="${esc(r.k)}" aria-label="Действия">${IC.dots}</button></div>`;
- const hostV=defBy(RX_HOST).map(d=>String(xs0[d.id]??'').trim()).find(Boolean)||'',guests=defBy(RX_GUEST).map(d=>String(xs0[d.id]??'').trim()).filter(Boolean);
- if(guests.length)h+=`<div class="colo" data-raw>${IC_COLO}<span><b>${LANG==='en'?'Colocation':'Колокация'}</b>${hostV?` · ${LANG==='en'?'host':'домакин'} <i>${hl(hostV)}</i>`:''} · ${LANG==='en'?(guests.length>1?'guests':'guest'):(guests.length>1?'гости':'гост')} <i>${guests.map(hl).join(', ')}</i></span></div>`;
- else if(hostV)h+=`<div class="colo" data-raw>${IC_COLO}<span>${LANG==='en'?'Host':'Домакин'} <i>${hl(hostV)}</i></span></div>`;
+ if(co.role!=='solo')h+=`<div class="colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&String(v).toUpperCase().replace(/\s+/g,'')===String(r.id).toUpperCase().replace(/\s+/g,'')?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
  if(g.length>1)h+=`<div class="opts" role="group" aria-label="Опции"><span class="lbl">Опция</span>`+
    g.map(p=>`<button class="opt${it.hits&&it.hits.has(p)?' hit':''}" type="button" data-p="${p}" aria-pressed="${p===i}">${L[p].opt||1}</button>`).join('')+`</div>`;
  if(ad)h+=`<div class="ad">${hl(ad)}${note?`<span class="note">${hl(note)}</span>`:''}</div>`;
  const xs=r.x||{},LD=liveDefs(),has=d=>String(xs[d.id]??'').trim()!=='';
- const coloIds=new Set([...defBy(RX_HOST),...defBy(RX_GUEST)].map(d=>d.id));
+ const coloIds=new Set([...defBy(RX_HOST),...defBy(RX_GUEST),...defBy(RX_TYPE)].map(d=>d.id));
  const tags=LD.filter(d=>d.badge&&has(d)&&!coloIds.has(d.id));
  if(tags.length)h+=`<div class="tags">${tags.map(d=>{const w=d.warn&&String(xs[d.id])!==String((d.opts||[])[0]??'');
    return `<span class="tag${w?' warn':''}" title="${esc(d.name)}">${w?IC.key:''}${hl(d.type==='yesno'?d.name+': '+xs[d.id]:xs[d.id])}</span>`;}).join('')}</div>`;
@@ -635,6 +640,17 @@ function card(k){
 const RX_ACCESS=/^(site\s*)?access$|^достъп$/i, RX_HOST=/^(site\s*)?host$|^домакин$/i,
  RX_GUEST=/^((first|second|third|fourth|fifth|1st|2nd|3rd|4th|5th)\s+)?guest(\s*\d+)?$|^(първи|втори|трети|четвърти)?\s*гост(\s*\d+)?$/i;
 const defBy=re=>liveDefs().filter(d=>re.test(d.name.trim()));
+const RX_TYPE=/^(site\s*)?type$|^тип(\s+на\s+обекта)?$/i;
+const xval=(r,re)=>defBy(re).map(d=>String((r.x||{})[d.id]??'').trim());
+// host: the Host column names this site (its ID, or its owner); guest: one of the Guest columns does; solo: no colocation
+function coloOf(r){
+ const host=xval(r,RX_HOST).find(Boolean)||'',guests=xval(r,RX_GUEST).filter(Boolean);
+ const me=String(r.id).toUpperCase().replace(/\s+/g,''),own=norm(r.own||'').split(/\s+/)[0];
+ const isMe=v=>{const parts=String(v).toUpperCase().split(/[\s,;\/]+/).filter(Boolean);return parts.includes(me)||(!!own&&norm(v).split(/\s+/)[0]===own);};
+ const role=!guests.length&&(!host||isMe(host))?'solo':isMe(host)?'host':guests.some(isMe)?'guest':'colo';
+ return {host,guests,role};}
+const ROLE_NAME={host:['Домакин','Host'],guest:['Гост','Guest'],solo:['Самостоятелен','Standalone'],colo:['Колокация','Colocation']};
+const roleName=k=>ROLE_NAME[k][LANG==='en'?1:0];
 // phone numbers inside any text become tap-to-call links
 const RX_PHONE=/(?:\+?359|\b0)[\s\-\/]?\d(?:[\s\-\/]?\d){6,9}\b/g;
 function linkPhones(v){let out='',last=0;v.replace(RX_PHONE,(m,i)=>{out+=hl(v.slice(last,i))+`<a href="tel:${esc(m.replace(/[^\d+]/g,''))}">${esc(m)}</a>`;last=i+m.length;return m;});return out+hl(v.slice(last));}
@@ -799,13 +815,14 @@ $('#nearMap').onclick=openMap;$('#mapBack').onclick=closeMap;
 
 /* ====================== filters ====================== */
 // within one field the ticked values are OR-ed; different fields are AND-ed; everything combines with the search
-let FLT={dist:0,reg:[],place:[],obl:[],f:{}};
+let FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{}};
 const regOf=i=>String(L[i].id).trim().slice(0,3).toUpperCase();
 const EMPTY='\u0000';
 function saveFlt(){try{localStorage.setItem('flt',JSON.stringify(FLT))}catch(e){}}
 const xv=(i,fid)=>String((L[i].x||{})[fid]??'').trim();
 function passes(i){
  if(FLT.reg&&FLT.reg.length&&!FLT.reg.includes(regOf(i)))return false;
+ if(FLT.role&&FLT.role.length&&!FLT.role.includes(coloOf(L[i]).role))return false;
  if(FLT.place.length&&!FLT.place.includes(PLACE[i]||EMPTY))return false;
  if(FLT.obl.length&&!FLT.obl.includes(OBL[i]||EMPTY))return false;
  for(const [fid,c] of Object.entries(FLT.f)){const v=xv(i,fid);
@@ -816,18 +833,19 @@ function passes(i){
 function activeFilters(){const a=[];const D=liveDefs();
  if(FLT.dist)a.push(['dist',`До ${FLT.dist} км от мен`]);
  if(FLT.reg&&FLT.reg.length)a.push(['reg','Район '+FLT.reg.join(', ')]);
+ if(FLT.role&&FLT.role.length)a.push(['role',FLT.role.map(roleName).join(', ')]);
  if(FLT.place.length)a.push(['place',FLT.place.map(v=>v===EMPTY?'без населено място':v).join(', ')]);
  if(FLT.obl.length)a.push(['obl','обл. '+FLT.obl.map(v=>v===EMPTY?'—':v).join(', ')]);
  for(const [fid,c] of Object.entries(FLT.f)){const d=D.find(x=>x.id===fid);if(!d){delete FLT.f[fid];continue;}
   if(c.mode==='filled')a.push(['f:'+fid,`${d.name}: попълнено`]);else if(c.mode==='empty')a.push(['f:'+fid,`${d.name}: празно`]);
   else if(c.vals&&c.vals.length)a.push(['f:'+fid,`${d.name}: ${c.vals.map(v=>v===EMPTY?'празно':v).join(', ')}`]);}
  return a;}
-function clearFilter(k){if(k==='dist')FLT.dist=0;else if(k==='reg')FLT.reg=[];else if(k==='place')FLT.place=[];else if(k==='obl')FLT.obl=[];else delete FLT.f[k.slice(2)];saveFlt();}
+function clearFilter(k){if(k==='dist')FLT.dist=0;else if(k==='reg')FLT.reg=[];else if(k==='role')FLT.role=[];else if(k==='place')FLT.place=[];else if(k==='obl')FLT.obl=[];else delete FLT.f[k.slice(2)];saveFlt();}
 function renderPills(){const a=activeFilters(),box=$('#fPills'),b=$('#fBadge');
  b.hidden=!a.length;b.textContent=a.length;box.hidden=!a.length;
  box.innerHTML=a.map(([k,txt])=>`<button class="pill" type="button" data-fk="${esc(k)}" aria-label="Махни филтъра ${esc(txt)}"><span>${esc(txt)}</span>${IC.x}</button>`).join('')+(a.length>1?'<button class="pill clear" type="button" data-fk="*">Изчисти всички</button>':'');}
 $('#fPills').addEventListener('click',e=>{const p=e.target.closest('[data-fk]');if(!p)return;
- if(p.dataset.fk==='*'){FLT={dist:0,reg:[],place:[],obl:[],f:{}};saveFlt();}else clearFilter(p.dataset.fk);search();});
+ if(p.dataset.fk==='*'){FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{}};saveFlt();}else clearFilter(p.dataset.fk);search();});
 // how many sites have each value (a site counts once even with several options)
 function facet(get){const c=new Map();G.forEach(pts=>{const s=new Set(pts.map(i=>get(i)||EMPTY));s.forEach(v=>c.set(v,(c.get(v)||0)+1));});
  return [...c.entries()].sort((a,b)=>(a[0]===EMPTY)-(b[0]===EMPTY)||b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),'bg'));}
@@ -841,6 +859,8 @@ function openFilters(){
  let h=`<div class="fsec"><h3>Разстояние от мен${FLT.dist?'<button type="button" data-clr="dist">Махни</button>':''}</h3>
   <div class="seg" data-seg="dist">${[0,1,5,10,25,50].map(d=>`<button type="button" data-v="${d}" aria-pressed="${FLT.dist===d}">${d?'до '+d+' км':'Без ограничение'}</button>`).join('')}</div>
   ${FLT.dist&&!me?'<p class="sub">Търся местоположението…</p>':''}</div>`;
+ const rl=facet(i=>coloOf(L[i]).role);
+ if(rl.length>1||(rl[0]&&rl[0][0]!=='solo'))h+=`<div class="fsec"><h3>Колокация${FLT.role.length?'<button type="button" data-clr="role">Махни</button>':''}</h3><div class="vlist" data-vl="role">${['host','guest','colo','solo'].map(k=>[k,(rl.find(x=>x[0]===k)||[,0])[1]]).filter(([k,n])=>n).map(([k,n])=>`<label><input type="checkbox" data-k="role" value="${k}" ${FLT.role.includes(k)?'checked':''}><span class="v"><span class="rdot id role-${k}"></span> ${esc(roleName(k))}</span><span class="cnt">${num(n)}</span></label>`).join('')}</div></div>`;
  if(rg.length>1)h+=`<div class="fsec"><h3>Район <small>първите 3 букви на Site ID</small>${FLT.reg.length?'<button type="button" data-clr="reg">Махни</button>':''}</h3>${vlist('reg',rg,FLT.reg,'')}</div>`;
  if(pl.filter(([v])=>v!==EMPTY).length>1)h+=`<div class="fsec"><h3>Населено място <small>от адреса</small>${FLT.place.length?'<button type="button" data-clr="place">Махни</button>':''}</h3>${vlist('place',pl,FLT.place,'няма в адреса')}</div>`;
  if(ob.filter(([v])=>v!==EMPTY).length>1)h+=`<div class="fsec"><h3>Област <small>от адреса</small>${FLT.obl.length?'<button type="button" data-clr="obl">Махни</button>':''}</h3>${vlist('obl',ob,FLT.obl,'няма в адреса')}</div>`;
@@ -857,7 +877,7 @@ function openFilters(){
  const upd=()=>{search();p.querySelector('#fShow').textContent=`Покажи ${num(res.length)} обекта`;};upd();
  p.addEventListener('change',e=>{const cb=e.target.closest('input[type=checkbox][data-k]');if(!cb)return;
   const k=cb.dataset.k,vals=[...p.querySelectorAll(`input[data-k="${CSS.escape(k)}"]:checked`)].map(x=>x.value);
-  if(k==='reg')FLT.reg=vals;else if(k==='place')FLT.place=vals;else if(k==='obl')FLT.obl=vals;else{const fid=k.slice(2);if(vals.length)FLT.f[fid]={vals};else delete FLT.f[fid];}
+  if(k==='role')FLT.role=vals;else if(k==='reg')FLT.reg=vals;else if(k==='place')FLT.place=vals;else if(k==='obl')FLT.obl=vals;else{const fid=k.slice(2);if(vals.length)FLT.f[fid]={vals};else delete FLT.f[fid];}
   saveFlt();upd();});
  p.addEventListener('input',e=>{const s=e.target.closest('[data-vf]');if(!s)return;const qq=norm(s.value.trim()),ql=tl(qq);
   p.querySelectorAll(`[data-vl="${CSS.escape(s.dataset.vf)}"] label`).forEach(l=>{l.hidden=!!qq&&!l.dataset.lbl.includes(qq)&&!l.dataset.lbl.includes(ql);});});
@@ -868,7 +888,7 @@ function openFilters(){
    else{const fid=k.slice(2);if(v)FLT.f[fid]={mode:v};else delete FLT.f[fid];}
    sb.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===sb));saveFlt();upd();return;}
   const cl=e.target.closest('[data-clr]');if(cl){clearFilter(cl.dataset.clr);openFilters();return;}
-  if(e.target.closest('#fClear')){FLT={dist:0,reg:[],place:[],obl:[],f:{}};saveFlt();openFilters();return;}
+  if(e.target.closest('#fClear')){FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{}};saveFlt();openFilters();return;}
   if(e.target.closest('#fShow')){closeSheet();window.scrollTo(0,0);}
  });
 }
@@ -1336,7 +1356,7 @@ function openMergePreview(pkg){
  trTree(document.body);
  $('#topArt').innerHTML=ILL_HERO.replace('<svg class="ill"','<svg class="ill" preserveAspectRatio="xMidYMax meet"');
  rebuild();
- try{const s=localStorage.getItem('q');if(s)q.value=s;const o=localStorage.getItem('op');if(o)opF=o;const f=JSON.parse(localStorage.getItem('flt')||'null');if(f)FLT={dist:0,reg:[],place:[],obl:[],f:{},...f,dist:0};}catch(e){}
+ try{const s=localStorage.getItem('q');if(s)q.value=s;const o=localStorage.getItem('op');if(o)opF=o;const f=JSON.parse(localStorage.getItem('flt')||'null');if(f)FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{},...f,dist:0};}catch(e){}
  search();
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
  let hid=false;try{hid=localStorage.getItem('hideInstall')==='1'}catch(e){}
