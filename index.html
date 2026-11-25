@@ -351,6 +351,68 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 5
 .toast button{border:0;background:transparent;color:var(--accent-soft);font:700 14.5px var(--sans);cursor:pointer;padding:0}
 .spin{width:18px;height:18px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+/* ====================== design pass: cards, rows, toolbar, desktop grid ====================== */
+.wrap{max-width:1120px}
+header{transition:box-shadow .2s}
+header.scrolled{box-shadow:0 6px 20px rgba(15,35,45,.10);border-bottom-color:transparent}
+@media (prefers-color-scheme:dark){header.scrolled{box-shadow:0 6px 20px rgba(0,0,0,.45)}}
+#q{height:48px;border-radius:14px}
+#fBtn,#meBtn{width:48px;height:48px;border-radius:14px}
+@media (min-width:860px){
+ #list{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;align-items:start}
+ #list>.welcome,#list>.empty,#list>#more{grid-column:1/-1}
+ #list>.welcome{max-width:640px;margin:0 auto;width:100%}
+}
+.c{border-radius:18px;padding:14px 14px 12px;gap:10px;border-color:color-mix(in srgb,var(--line) 80%,transparent);
+ box-shadow:0 1px 2px rgba(15,35,45,.04),0 4px 14px rgba(15,35,45,.05)}
+@media (prefers-color-scheme:dark){.c{box-shadow:0 1px 0 rgba(255,255,255,.03) inset}}
+.t{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:10px}
+.t .id{margin-top:1px;gap:6px}
+.t .id .onair{width:8px;height:8px;margin:0;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 8px rgba(34,197,94,.9)}
+.hd{display:flex;flex-direction:column;gap:5px;min-width:0}
+.hd .nm{font-size:16.5px;font-weight:650;line-height:1.25;letter-spacing:-.01em;overflow-wrap:anywhere}
+.sub2{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sub2:empty{display:none}
+.sub2 .own{font-size:11px;padding:3px 8px;border-radius:6px}
+.sub2 .stype{margin:0;vertical-align:0;font-size:11px;padding:3px 7px}
+.t .dist{align-self:start;margin-top:2px;white-space:nowrap}
+.t .more-btn{margin:-3px -6px 0 0}
+.rows{display:flex;flex-direction:column;gap:6px}
+.rows:empty{display:none}
+.row2{display:grid;grid-template-columns:16px 1fr;gap:9px;align-items:start;font-size:14px;line-height:1.4;color:var(--fg);margin:0}
+.row2>svg{color:var(--faint);margin-top:2px}
+.row2.colo>svg{color:var(--accent)}
+.row2.cont>svg{color:var(--accent)}
+.row2 .note{font-size:12.5px}
+.row2.colo{font-size:13px;color:var(--muted)}
+.row2.colo i{color:var(--fg)}
+.row2 a{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
+.row2 a:hover{text-decoration:underline}
+.sub2 .dist{font-size:11.5px;padding:3px 8px;border-radius:6px}
+.optw{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.optw .lbl{font-size:12.5px;color:var(--muted);margin-right:4px}
+.opt{height:28px;min-width:30px;border-radius:7px}
+details.det{border-radius:12px;background:transparent;border-color:var(--line)}
+details.det summary{padding:8px 12px;font-size:13px}
+details.det[open]{background:var(--surface-2)}
+.meta{justify-content:space-between;gap:8px;padding-top:2px}
+.meta .cp{all:unset;border:0!important;background:transparent!important;flex:none!important;display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--muted);border-radius:6px;padding:2px 4px;margin-left:-4px}
+.meta .cp .co{font-size:12.5px}
+.meta .cp svg{width:14px;height:14px;opacity:.7}
+.meta .cp:hover{background:var(--surface-2);color:var(--fg)}
+.meta .cp.ok{color:var(--accent)}
+.meta .cp:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.meta .nb{margin-left:0;font-size:13px}
+.b{display:grid;grid-template-columns:1fr 1fr 48px;gap:8px;margin-top:0;padding-top:10px;border-top:1px solid var(--line)}
+.b a,.b button{min-height:44px;border-radius:12px;font-size:14.5px}
+.b .rtb{width:48px;flex:none!important}
+.gm{box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 30%,transparent)}
+@media (hover:hover){.gm:hover{filter:brightness(1.07)}.wz:hover{filter:brightness(.97)}}
+.c.origin{box-shadow:0 0 0 2px var(--accent),0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent)}
+.chip{transition:background .15s,border-color .15s}
+.nearbar{border-radius:12px}
+.routebar .btn{border-radius:10px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ill .wv,.mark .wv{opacity:.6}}
 </style>
 </head>
@@ -546,7 +608,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='31';
+const APP_VER='32';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -657,16 +719,24 @@ function card(k){
  const [ad,note]=r.addr?splitAddr(r.addr):['',''];const o=origin();
  const isOrigin=near&&near.type==='site'&&g.some(p=>L[p].k===near.k);
  const xs0=r.x||{},acc=defBy(RX_ACCESS).map(d=>String(xs0[d.id]??'').trim()).find(Boolean);
- const lock=acc?`<span class="acclock" title="${esc((LANG==='en'?'Access: ':'Достъп: ')+acc)}" role="img" aria-label="${esc((LANG==='en'?'Access required: ':'Нужен достъп: ')+acc)}">${IC_LOCK}</span>`:'';
- const co=coloOf(r),stype=xval(r,RX_TYPE).find(Boolean)||'';
- let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t">${(()=>{const oa=xval(r,RX_ONAIR).find(Boolean);return oa?`<span class="onair" title="On Air: ${esc(oa)}" role="img" aria-label="On Air"></span>`:'';})()}<span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${esc(r.id)}</span><span class="nm">${hl(r.name||'')}${lock}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span>`+
+ const lock=acc?`<span class="acclock" title="${esc(T('Достъп: ','Access: ')+acc)}" role="img" aria-label="${esc(T('Нужен достъп: ','Access required: ')+acc)}">${IC_LOCK}</span>`:'';
+ const co=coloOf(r),stype=xval(r,RX_TYPE).find(Boolean)||'',oa=xval(r,RX_ONAIR).find(Boolean);
+ const sameId=v=>String(v).toUpperCase().replace(/\s+/g,'')===String(r.id).toUpperCase().replace(/\s+/g,'');
+ // header: status dot, ID (coloured by colocation role), name, owner and type, distance, menu
+ let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t">`+
+  `<span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${oa?`<span class="onair" title="On Air: ${esc(oa)}" role="img" aria-label="On Air"></span>`:''}${esc(r.id)}</span>`+
+  `<div class="hd"><span class="nm">${hl(r.name||'')}${lock}</span>`+
+  `<span class="sub2">`+(o?(isOrigin?`<span class="dist origin">${T('избран','selected')}</span>`:`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+`${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span></div>`+
   `<button class="more-btn" type="button" data-act="${esc(r.k)}" aria-label="Действия">${IC.dots}</button></div>`;
+ // info rows, each with its own icon
+ h+=`<div class="rows">`;
+ if(ad)h+=`<div class="row2 ad">${IC_PIN}<span>${hl(ad)}${note?`<span class="note">${hl(note)}</span>`:''}</span></div>`;
  {const cv=contactDefs().map(d=>String(xs0[d.id]??'').trim()).filter(Boolean);
-  if(cv.length)h+=`<div class="colo cont" data-raw>${IC_PERSON}<span>${cv.map(v=>linkPhones(v)).join(' · ')}</span></div>`;}
- if(co.role!=='solo')h+=`<div class="colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&String(v).toUpperCase().replace(/\s+/g,'')===String(r.id).toUpperCase().replace(/\s+/g,'')?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
- if(g.length>1)h+=`<div class="opts" role="group" aria-label="Опции"><span class="lbl">Опция</span>`+
-   g.map(p=>`<button class="opt${it.hits&&it.hits.has(p)?' hit':''}" type="button" data-p="${p}" aria-pressed="${p===i}">${L[p].opt||1}</button>`).join('')+`</div>`;
- if(ad)h+=`<div class="ad">${hl(ad)}${note?`<span class="note">${hl(note)}</span>`:''}</div>`;
+  if(cv.length)h+=`<div class="row2 cont" data-raw>${IC_PERSON}<span>${cv.map(v=>linkPhones(v)).join(' · ')}</span></div>`;}
+ if(co.role!=='solo')h+=`<div class="row2 colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&sameId(v)?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
+ if(g.length>1)h+=`<div class="row2 opts" role="group" aria-label="Опции">${IC_LAYERS}<span class="optw"><span class="lbl">Опция</span>`+
+   g.map(p=>`<button class="opt${it.hits&&it.hits.has(p)?' hit':''}" type="button" data-p="${p}" aria-pressed="${p===i}">${L[p].opt||1}</button>`).join('')+`</span></div>`;
+ h+=`</div>`;
  const xs=r.x||{},LD=liveDefs(),has=d=>String(xs[d.id]??'').trim()!=='';
  const coloIds=new Set([...defBy(RX_HOST),...defBy(RX_GUEST),...defBy(RX_TYPE),...contactDefs()].map(d=>d.id));
  const tags=LD.filter(d=>d.badge&&has(d)&&!coloIds.has(d.id));
@@ -674,13 +744,13 @@ function card(k){
    return `<span class="tag${w?' warn':''}" title="${esc(d.name)}">${w?IC.key:''}${hl(d.type==='yesno'?d.name+': '+xs[d.id]:xs[d.id])}</span>`;}).join('')}</div>`;
  const det=LD.filter(d=>!d.badge&&has(d)&&!coloIds.has(d.id));
  if(det.length)h+=`<details class="det"><summary>Детайли · ${det.length}</summary><dl>${det.map(d=>`<dt>${esc(d.name)}</dt><dd>${fmtVal(d,xs[d.id])}</dd>`).join('')}</dl></details>`;
- h+=`<div class="meta">${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}<span class="co">${ll}</span>`+
-   (o?(isOrigin?'<span class="dist origin">избран</span>':`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+
+ // coordinates with copy, nearby link
+ h+=`<div class="meta"><button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите" title="${T('Копирай координатите','Copy coordinates')}"><span class="co">${ll}</span>${IC.cp}</button>`+
    (isOrigin?'':`<button class="nb" type="button" data-near="${esc(r.k)}">${IC.near}Наблизо</button>`)+`</div>`;
+ // actions
  h+=`<div class="b"><a class="gm" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">${IC.map}Google Maps</a>`+
    `<a class="wz" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>${IC.nav}Waze</a>`+
-   `<button class="rtb${inRoute(r.k)?' on':''}" data-rt="${esc(r.k)}" type="button" aria-label="${inRoute(r.k)?T('Махни от маршрута','Remove from route'):T('Добави в маршрута','Add to route')}" title="${inRoute(r.k)?T('В маршрута','In route'):T('Добави в маршрута','Add to route')}">${inRoute(r.k)?IC.rtOn:IC.rt}</button>`+
-   `<button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите">${IC.cp}</button></div></article>`;
+   `<button class="rtb${inRoute(r.k)?' on':''}" data-rt="${esc(r.k)}" type="button" aria-label="${inRoute(r.k)?T('Махни от маршрута','Remove from route'):T('Добави в маршрута','Add to route')}" title="${inRoute(r.k)?T('В маршрута','In route'):T('Добави в маршрута','Add to route')}">${inRoute(r.k)?IC.rtOn:IC.rt}</button></div></article>`;
  return h;
 }
 /* special columns, recognised by their header: access (red lock), host and guests (colocation line) */
@@ -712,6 +782,8 @@ function fmtVal(d,v){v=String(v);
  if(d.type==='phone'){const tel=v.replace(/[^\d+]/g,'');return tel.length>=6?`<a href="tel:${esc(tel)}">${hl(v)}</a>`:hl(v);}
  return linkPhones(v);}
 const IC_LOCK='<svg class="lockic" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2.5" fill="currentColor"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.7" fill="#fff"/></svg>';
+const IC_PIN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>';
+const IC_LAYERS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 8 12 13l9.5-5z"/><path d="M2.5 12.5 12 17.5l9.5-5"/></svg>';
 const IC_PERSON='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
 const IC_COLO='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 21 11 9M15.5 21 13 9M9.6 16h4.8"/><path d="M12 9V5"/><path d="M6.5 4.5a7 7 0 0 0 0 9M17.5 4.5a7 7 0 0 1 0 9"/></svg>';
 const ILL_HERO=`<svg class="ill" viewBox="0 0 360 196" role="img" aria-label="Базова станция с антени и радиорелейна връзка"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--il-sky1)"/><stop offset="1" style="stop-color:var(--il-sky2)"/></linearGradient></defs>
@@ -1071,7 +1143,8 @@ list.addEventListener('click',async e=>{
  const rtb=e.target.closest('.rtb');if(rtb){toggleRoute(rtb.dataset.rt);rerenderCard(rtb.dataset.rt);toast(inRoute(rtb.dataset.rt)?T('Добавен в маршрута','Added to route'):T('Махнат от маршрута','Removed from route'));return;}
  const act=e.target.closest('[data-act]');if(act){openActions(act.dataset.act);return;}
  const b=e.target.closest('.cp');if(!b)return;
- try{await navigator.clipboard.writeText(b.dataset.ll);b.innerHTML=IC.ok;b.classList.add('ok');setTimeout(()=>{b.innerHTML=IC.cp;b.classList.remove('ok')},1500);}
+ const sw=x=>{const old=b.querySelector('svg');if(old)old.outerHTML=x;};
+ try{await navigator.clipboard.writeText(b.dataset.ll);sw(IC.ok);b.classList.add('ok');setTimeout(()=>{sw(IC.cp);b.classList.remove('ok')},1500);}
  catch(err){toast(b.dataset.ll);}
 });
 
@@ -1523,6 +1596,8 @@ function openMergePreview(pkg){
  catch(e){list.innerHTML='<div class="empty"><strong>Хранилището на браузъра е недостъпно</strong><span>Провери дали не си в частен режим (Private) на Safari.</span></div>';return;}
  $('#langTxt').textContent=LANG==='en'?'БГ':'EN';$('#langBtn').setAttribute('aria-label',LANG==='en'?'Превключи на български':'Switch to English');
  $('#langBtn').onclick=()=>{try{localStorage.setItem('lang',LANG==='en'?'bg':'en')}catch(_){}location.reload();};
+ const hdr=document.querySelector('header'),onScroll=()=>hdr.classList.toggle('scrolled',window.scrollY>($('#top').offsetHeight-4));
+ window.addEventListener('scroll',onScroll,{passive:true});onScroll();
  trTree(document.body);
  $('#topArt').innerHTML=ILL_HERO.replace('<svg class="ill"','<svg class="ill" preserveAspectRatio="xMidYMax meet"');
  rebuild();
