@@ -154,7 +154,9 @@ main{padding-top:14px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)
 .id{font:600 13.5px/1 var(--mono);letter-spacing:.02em;padding:6px 8px 6px 7px;border-radius:7px;background:var(--fg);color:var(--surface);flex:none;display:inline-flex;align-items:center;gap:5px}
 .nm{font-weight:600;font-size:17px;letter-spacing:-.005em;min-width:0;overflow-wrap:anywhere;flex:1}
 .acclock{display:inline-flex;vertical-align:-2px;margin-left:6px;color:#d93025}
-.id.role-host{background:var(--accent);color:var(--accent-ink)}
+.id.role-host{background:#1e8e3e;color:#fff}
+@media (prefers-color-scheme:dark){.id.role-host{background:#46c06a;color:#06260f}}
+.onair{flex:none;width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.22),0 0 8px rgba(34,197,94,.7);margin-right:-2px}
 .id.role-guest{background:#c26a00;color:#fff}
 @media (prefers-color-scheme:dark){.id.role-guest{background:#f0a23c;color:#2a1700}}
 .id.role-colo{background:var(--p1);color:#fff}
@@ -504,7 +506,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='27';
+const APP_VER='28';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -615,7 +617,7 @@ function card(k){
  const xs0=r.x||{},acc=defBy(RX_ACCESS).map(d=>String(xs0[d.id]??'').trim()).find(Boolean);
  const lock=acc?`<span class="acclock" title="${esc((LANG==='en'?'Access: ':'Достъп: ')+acc)}" role="img" aria-label="${esc((LANG==='en'?'Access required: ':'Нужен достъп: ')+acc)}">${IC_LOCK}</span>`:'';
  const co=coloOf(r),stype=xval(r,RX_TYPE).find(Boolean)||'';
- let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t"><span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${esc(r.id)}</span><span class="nm">${hl(r.name||'')}${lock}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span>`+
+ let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t">${(()=>{const oa=xval(r,RX_ONAIR).find(Boolean);return oa?`<span class="onair" title="On Air: ${esc(oa)}" role="img" aria-label="On Air"></span>`:'';})()}<span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${esc(r.id)}</span><span class="nm">${hl(r.name||'')}${lock}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span>`+
   `<button class="more-btn" type="button" data-act="${esc(r.k)}" aria-label="Действия">${IC.dots}</button></div>`;
  if(co.role!=='solo')h+=`<div class="colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&String(v).toUpperCase().replace(/\s+/g,'')===String(r.id).toUpperCase().replace(/\s+/g,'')?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
  if(g.length>1)h+=`<div class="opts" role="group" aria-label="Опции"><span class="lbl">Опция</span>`+
@@ -641,12 +643,14 @@ const RX_ACCESS=/^(site\s*)?access$|^достъп$/i, RX_HOST=/^(site\s*)?host$|
  RX_GUEST=/^((first|second|third|fourth|fifth|1st|2nd|3rd|4th|5th)\s+)?guest(\s*\d+)?$|^(първи|втори|трети|четвърти)?\s*гост(\s*\d+)?$/i;
 const defBy=re=>liveDefs().filter(d=>re.test(d.name.trim()));
 const RX_TYPE=/^(site\s*)?type$|^тип(\s+на\s+обекта)?$/i;
+const RX_ONAIR=/^on[\s-]*air$/i, RX_LISTF=/construction\s*type|^(site\s*)?type$/i;
 const xval=(r,re)=>defBy(re).map(d=>String((r.x||{})[d.id]??'').trim());
 // host: the Host column names this site (its ID, or its owner); guest: one of the Guest columns does; solo: no colocation
 function coloOf(r){
  const host=xval(r,RX_HOST).find(Boolean)||'',guests=xval(r,RX_GUEST).filter(Boolean);
- const me=String(r.id).toUpperCase().replace(/\s+/g,''),own=norm(r.own||'').split(/\s+/)[0];
- const isMe=v=>{const parts=String(v).toUpperCase().split(/[\s,;\/]+/).filter(Boolean);return parts.includes(me)||(!!own&&norm(v).split(/\s+/)[0]===own);};
+ const me=String(r.id).toUpperCase().replace(/\s+/g,'');
+ // "us" = this site's own ID, or A1 / ETS (EuroTeleSites) named in the column
+ const isMe=v=>{const parts=String(v).toUpperCase().split(/[\s,;\/()]+/).filter(Boolean);return parts.includes(me)||parts.some(p=>p==='A1'||p==='ETS'||p.startsWith('EUROTELE'));};
  const role=!guests.length&&(!host||isMe(host))?'solo':isMe(host)?'host':guests.some(isMe)?'guest':'colo';
  return {host,guests,role};}
 const ROLE_NAME={host:['Домакин','Host'],guest:['Гост','Guest'],solo:['Самостоятелен','Standalone'],colo:['Колокация','Colocation']};
@@ -867,7 +871,7 @@ function openFilters(){
  for(const d of D){const f=facet(i=>xv(i,d.id)),filled=f.filter(([v])=>v!==EMPTY);const c=FLT.f[d.id]||{};
   if(!filled.length)continue;
   const clr=FLT.f[d.id]?`<button type="button" data-clr="f:${esc(d.id)}">Махни</button>`:'';
-  if(filled.length<=25&&d.type!=='longtext')h+=`<div class="fsec"><h3>${esc(d.name)}${clr}</h3>${vlist('f:'+d.id,f,c.vals||[],'празно')}</div>`;
+  if((filled.length<=25||(RX_LISTF.test(d.name.trim())&&filled.length<=300))&&d.type!=='longtext')h+=`<div class="fsec"><h3>${esc(d.name)}${clr}</h3>${vlist('f:'+d.id,f,c.vals||[],'празно')}</div>`;
   else{const e=(f.find(([v])=>v===EMPTY)||[,0])[1];
    h+=`<div class="fsec"><h3>${esc(d.name)} <small>${num(filled.length)} различни стойности</small>${clr}</h3><div class="seg" data-seg="f:${esc(d.id)}">
    ${[['','Всички'],['filled',`Попълнено`],['empty',`Празно (${num(e)})`]].map(([m,l])=>`<button type="button" data-v="${m}" aria-pressed="${(c.mode||'')===m}">${l}</button>`).join('')}</div></div>`;}}
