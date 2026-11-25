@@ -102,6 +102,35 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 .nearbar button.mapbtn{margin-left:auto;background:var(--accent);color:var(--accent-ink)}
 .nearbar button.mapbtn+button{margin-left:0}
 .nearbar.err .mapbtn{display:none}
+.projbtn{all:unset;display:inline-flex;align-items:center;gap:4px;cursor:pointer;font:inherit;max-width:min(52vw,320px);border-radius:8px;padding:2px 4px;margin:-2px -4px}
+.projbtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.projbtn svg{flex:none;opacity:.7}
+.projbtn:hover{background:color-mix(in srgb,var(--surface) 60%,transparent)}
+.projbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.projbtn.on{background:color-mix(in srgb,var(--surface) 80%,transparent);padding:3px 8px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.projbar{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.pbar{display:flex;height:8px;border-radius:5px;overflow:hidden;background:var(--line);gap:2px}
+.pbar.sm{height:5px;margin-top:6px;max-width:220px}
+.pbar span{min-width:4px}
+.pchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.pchips::-webkit-scrollbar{display:none}
+.pchip{flex:none;display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--sans);padding:7px 10px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+.pchip i{width:9px;height:9px;border-radius:3px;flex:none}
+.pchip span{font:500 11.5px var(--mono);color:var(--muted)}
+.pchip[aria-pressed="true"]{background:var(--fg);color:var(--surface);border-color:var(--fg)}
+.pchip[aria-pressed="true"] span{color:inherit;opacity:.8}
+.pchip.miss{color:var(--danger);border-style:dashed}
+.stg{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font:700 11px/1 var(--sans);padding:4px 8px;border-radius:6px;background:var(--sc);color:#fff;letter-spacing:.01em;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.stg::after{content:"";width:5px;height:5px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translate(-1px,-1px);opacity:.85}
+.stg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lgv .stg::after{display:none}
+.stq::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--sc);margin-right:6px;vertical-align:0}
+details.pdet summary{color:var(--fg)}
+.prow{display:flex;align-items:center;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0}
+.prow .row{border-top:0;flex:1}
+.prow .mini{margin-right:10px}
+.row.cur,.prow.cur .row{background:var(--accent-soft)}
 .mhelp{margin-left:auto;width:36px;height:36px;padding:0;border-radius:50%;font-weight:700;flex:none}
 .lgtabs{display:flex;gap:6px;position:sticky;top:-8px;background:var(--surface);padding:6px 0;z-index:1}
 .lgtabs button{flex:1;font:600 13.5px var(--sans);padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);cursor:pointer}
@@ -454,7 +483,7 @@ details.det[open]{background:var(--surface-2)}
       <div class="mark" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 22 11 8.5M15.4 22 13 8.5M9.3 18.2h5.4M9.9 14.4h4.2M9.3 18.2l4.8-3.8M14.7 18.2l-4.8-3.8M10.5 10.9h3"/><path d="M12 8.5V4" stroke-width="1.9"/><rect x="9.6" y="5" width="1.6" height="4" rx=".5" fill="currentColor" stroke="none"/><rect x="12.8" y="5" width="1.6" height="4" rx=".5" fill="currentColor" stroke="none"/><path class="wv" d="M16.6 4.2a4.6 4.6 0 0 1 0 5.6M7.4 4.2a4.6 4.6 0 0 0 0 5.6"/><path class="wv w2" d="M19.2 2.4a8 8 0 0 1 0 9.2M4.8 2.4a8 8 0 0 0 0 9.2"/></svg>
       </div>
-      <div class="ttl"><h1>Обекти</h1><div id="info" aria-live="polite"></div></div>
+      <div class="ttl"><h1><button class="projbtn" id="projBtn" type="button"><span id="projName" data-raw>Обекти</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h1><div id="info" aria-live="polite"></div></div>
       <div class="tbtns">
       <button class="iconbtn" id="menuBtn" type="button" aria-label="База и импорт">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V5.5"/><path d="M4.5 12v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V12"/></svg>
@@ -483,6 +512,7 @@ details.det[open]{background:var(--surface-2)}
     </div>
     <div class="chips" id="chips" role="group" aria-label="Собственик"></div>
     <div class="pills" id="fPills" hidden></div>
+    <div class="projbar" id="projBar" hidden></div>
     <div class="nearbar" id="nearbar" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg>
       <span class="txt" id="neartxt"></span>
@@ -505,6 +535,7 @@ details.det[open]{background:var(--surface-2)}
 <div class="toast" id="toast" role="status" hidden></div>
 <input type="file" id="fileTable" accept=".xlsx,.xls,.csv,.txt,.ods" hidden>
 <input type="file" id="filePkg" hidden>
+<input type="file" id="fileProj" accept=".xlsx,.xls,.csv,.txt,.ods" hidden>
 
 <script>
 'use strict';
@@ -638,7 +669,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='35';
+const APP_VER='36';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -758,7 +789,8 @@ function card(k){
   `<span class="id role-${co.role}"${co.role!=='solo'?` title="${esc(roleName(co.role))}"`:''}>${oa?`<span class="onair" title="On Air: ${esc(oa)}" role="img" aria-label="On Air"></span>`:''}${esc(r.id)}</span>`+
   `<div class="hd"><span class="nm">${hl(r.name||'')}${lock}${stype?`<span class="stype">${hl(stype)}</span>`:''}</span></div>`+
   `<button class="more-btn" type="button" data-act="${esc(r.k)}" aria-label="Действия">${IC.dots}</button></div>`;
- if(r.own||o)h+=`<div class="ownrow">${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}`+(o?(isOrigin?`<span class="dist origin">${T('избран','selected')}</span>`:`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+`</div>`;
+ const pit=projItem(r),pst=stageOf(pit);
+ if(r.own||o||pit)h+=`<div class="ownrow">${pit?`<button type="button" class="stg" data-pedit="${esc(pid(r.id))}" style="--sc:${stageColor(pst)}" title="${T('Промени','Edit')}">${esc(pst||T('без етап','no stage'))}</button>`:''}${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}`+(o?(isOrigin?`<span class="dist origin">${T('избран','selected')}</span>`:`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+`</div>`;
  if(co.role!=='solo')h+=`<div class="row2 colo" data-raw title="${esc(roleName(co.role))}">${IC_COLO}<span>${co.host?`<i class="${co.role==='host'?'me':''}">${hl(co.host)}</i>`:''}${co.guests.length?`${co.host?' / ':''}${co.guests.map(v=>`<i class="${co.role==='guest'&&sameId(v)?'me':''}">${hl(v)}</i>`).join(', ')}`:''}</span></div>`;
  // info rows, each with its own icon
  h+=`<div class="rows">`;
@@ -774,6 +806,8 @@ function card(k){
  if(tags.length)h+=`<div class="tags">${tags.map(d=>{const w=d.warn&&String(xs[d.id])!==String((d.opts||[])[0]??'');
    return `<span class="tag${w?' warn':''}" title="${esc(d.name)}">${w?IC.key:''}${hl(d.type==='yesno'?d.name+': '+xs[d.id]:xs[d.id])}</span>`;}).join('')}</div>`;
  const det=LD.filter(d=>!d.badge&&has(d)&&!coloIds.has(d.id));
+ if(pit){const pc=projCols().filter(c=>String((pit.x||{})[c.id]??'').trim());
+  if(pc.length)h+=`<details class="det pdet"><summary>${esc(PROJ.name)} · ${pc.length}</summary><dl>${pc.map(c=>`<dt>${esc(c.name)}</dt><dd>${linkPhones(String(pit.x[c.id]))}</dd>`).join('')}</dl></details>`;}
  if(det.length)h+=`<details class="det"><summary>Детайли · ${det.length}</summary><dl>${det.map(d=>`<dt>${esc(d.name)}</dt><dd>${fmtVal(d,xs[d.id])}</dd>`).join('')}</dl></details>`;
  // coordinates with copy, nearby link
  h+=`<div class="meta"><span class="co">${ll}</span>`+
@@ -886,6 +920,7 @@ function search(){
  if(opF!=='all'&&!OPS.includes(opF))opF='all';
  const o=origin();const cnt=new Map();res=[];let total=0;
  G.forEach((pts,g)=>{
+  if(!projIn(pts))return;
   const m=(tt?pts.filter(i=>tt.every(([a,b,,c])=>IDX[i].includes(a)||IDX[i].includes(b)||(c&&IDX[i].includes(c)))):pts).filter(passes);
   if(!m.length)return;
   total++;const op=ownerOf(L[pts[0]]);cnt.set(op,(cnt.get(op)||0)+1);
@@ -900,10 +935,12 @@ function search(){
  chips.innerHTML=`<button class="chip" type="button" data-o="all" aria-pressed="${opF==='all'}">Всички <span>${num(total)}</span></button>`+
   OPS.map(op=>`<button class="chip" type="button" data-o="${esc(op)}" aria-pressed="${opF===op}">${esc(op)} <span>${num(cnt.get(op)||0)}</span></button>`).join('');
  const rp=res.reduce((n,it)=>n+G[it.g].length,0);
- info.innerHTML=L.length?(res.length===G.length?`<b>${num(G.length)}</b> обекта`:`<b>${num(res.length)}</b> от ${num(G.length)}`):'';
+ const totG=PROJ?G.filter(projIn).length:G.length;
+ info.innerHTML=L.length?(res.length===totG?`<b>${num(totG)}</b> обекта`:`<b>${num(res.length)}</b> от ${num(totG)}`):'';
  $('#topStats').innerHTML=L.length?(d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).slice(2)}`)(new Date(META.changed||Date.now())):'Базата е празна';
  renderPills();
  renderRouteBar();
+ renderProjBar();
  updateNearbar();
  render(false);
  try{localStorage.setItem('q',q.value);localStorage.setItem('op',opF)}catch(e){}
@@ -967,7 +1004,7 @@ function drawMap(fit){
  const items=res.slice(0,150).map(it=>L[sel.get(it.g)??it.best]);
  for(const r of items.slice().reverse()){
   const isO=near&&near.type==='site'&&r.k===near.k;
-  const col=cs.getPropertyValue('--'+(OPCLS.get(ownerOf(r))||'p5')).trim()||'#4f6475';
+  const col=PROJ?stageColor(stageOf(projItem(r))):cs.getPropertyValue('--'+(OPCLS.get(ownerOf(r))||'p5')).trim()||'#4f6475';
   const m=isO?LF.marker([r.lat,r.lon],{icon:LF.divIcon({className:'',html:`<div class="pinwrap"><span class="ring"></span><span class="lbl">${esc(r.id)}</span><svg viewBox="0 0 40 52" width="40" height="52"><path d="M20 51C20 51 3 31 3 19a17 17 0 0 1 34 0c0 12-17 32-17 32z" fill="#0a6e78" stroke="#fff" stroke-width="3"/><g fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M16 29l3.2-13M24 29l-3.2-13M16.8 25.4h6.4M16.8 25.4l5.6-4.6M23.2 25.4l-5.6-4.6M20 16v-5"/><path d="M25.5 11.5a7 7 0 0 1 0 8M14.5 11.5a7 7 0 0 0 0 8"/></g></svg></div>`,iconSize:[40,52],iconAnchor:[20,51],popupAnchor:[0,-46]}),zIndexOffset:1000})
             :LF.circleMarker([r.lat,r.lon],{radius:7,color:'#fff',weight:2,fillColor:col,fillOpacity:.92});
   m.bindPopup(popupHtml(r,o)).addTo(mapLayer);
@@ -1081,6 +1118,177 @@ function drawRouteMap(fit){
 }
 $('#rbOpen').onclick=openRoute;
 
+/* ====================== projects: lists of sites with their own columns and stages ======================
+   A project is a list of Site IDs plus its own columns (stage, dates, notes...). Coordinates, address,
+   access, contacts come from the main database. Projects travel in packages like the sites. */
+let PROJECTS=[],PROJ=null;
+const STAGE_COLORS=['#1a73e8','#c26a00','#1e8e3e','#8e44ad','#0a8f8f','#c2185b','#6d4c41','#b3261e','#5f6b7a','#2e7d32'];
+const liveProjects=()=>PROJECTS.filter(p=>!p.del);
+const pid=s=>String(s??'').trim().toUpperCase();
+const projItem=r=>PROJ?PROJ.items[pid(r.id)]:null;
+const projIn=pts=>{if(!PROJ)return true;const it=PROJ.items[pid(L[pts[0]].id)];return !!it&&!it.del;};
+const stageOf=it=>PROJ&&it&&PROJ.stageCol?String((it.x||{})[PROJ.stageCol]??'').trim():'';
+const stageColor=s=>{if(!s||!PROJ)return '#9aa6b2';const i=PROJ.stages.indexOf(s);return STAGE_COLORS[(i<0?PROJ.stages.length:i)%STAGE_COLORS.length];};
+const projCols=()=>PROJ?PROJ.cols.filter(c=>c.id!==PROJ.stageCol):[];
+async function persistProjects(){await idb.set('projects',PROJECTS);}
+function setProject(id,silent){
+ PROJ=id?liveProjects().find(p=>p.id===id)||null:null;
+ try{localStorage.setItem('proj',PROJ?PROJ.id:'')}catch(e){}
+ FLT.stage=[];FLT.pf={};saveFlt();
+ renderProjHead();if(!silent){search();window.scrollTo(0,0);}
+}
+function renderProjHead(){
+ const n=$('#projName');n.textContent=PROJ?PROJ.name:T('Обекти','Sites');$('#projBtn').classList.toggle('on',!!PROJ);
+ $('#projBtn').setAttribute('aria-label',T('Смени списъка','Switch list'));
+}
+function projCounts(p){const inBase=new Set(G.map(g=>pid(L[g[0]].id)));let n=0,miss=0;const cnt=new Map();
+ const prev=PROJ;PROJ=p;
+ for(const [id,it] of Object.entries(p.items)){if(it.del)continue;if(!inBase.has(id)){miss++;continue;}n++;const s=stageOf(it);cnt.set(s,(cnt.get(s)||0)+1);}
+ PROJ=prev;return {n,miss,cnt};}
+function renderProjBar(){
+ const b=$('#projBar');if(!PROJ){b.hidden=true;return;}b.hidden=false;
+ const {n,miss,cnt}=projCounts(PROJ);
+ const order=[...PROJ.stages.filter(s=>cnt.has(s)),...[...cnt.keys()].filter(s=>s&&!PROJ.stages.includes(s)),...(cnt.has('')?['']:[])];
+ const sel=FLT.stage||[];
+ b.innerHTML=`<div class="pbar" aria-hidden="true">${order.map(s=>`<span style="flex:${cnt.get(s)};background:${stageColor(s)}"></span>`).join('')}</div>
+ <div class="pchips">${order.map(s=>{const k=s||EMPTY;return `<button type="button" class="pchip" data-stage="${esc(k)}" aria-pressed="${sel.includes(k)}"><i style="background:${stageColor(s)}"></i>${esc(s||T('без етап','no stage'))} <span>${num(cnt.get(s))}</span></button>`;}).join('')}
+ ${miss?`<button type="button" class="pchip miss" data-pmiss>${T('не са в базата','not in database')} <span>${num(miss)}</span></button>`:''}</div>`;
+}
+$('#projBar').addEventListener('click',e=>{
+ const c=e.target.closest('[data-stage]');
+ if(c){const k=c.dataset.stage;FLT.stage=(FLT.stage||[]).includes(k)?FLT.stage.filter(x=>x!==k):[...(FLT.stage||[]),k];saveFlt();search();return;}
+ if(e.target.closest('[data-pmiss]')){const inBase=new Set(G.map(g=>pid(L[g[0]].id)));
+  const ids=Object.entries(PROJ.items).filter(([id,it])=>!it.del&&!inBase.has(id)).map(([id])=>id);
+  sheet(T('Не са в базата','Not in the database'),`<p class="sub">${T('Тези номера са в проекта, но ги няма в общата база, затова няма координати и не се показват. Импортирай ги в общата база или провери номерата.','These IDs are in the project but not in the main database, so they have no coordinates and are not shown. Import them into the main database or check the IDs.')}</p><div class="prev">${esc(ids.join(', '))}</div>`);}
+});
+$('#projBtn').onclick=()=>openProjects();
+function openProjects(){
+ const ps=liveProjects();
+ const row=p=>{const {n,miss,cnt}=projCounts(p);const order=[...p.stages.filter(s=>cnt.has(s)),...(cnt.has('')?['']:[])];
+  const prev=PROJ;PROJ=p;const bar=`<span class="pbar sm">${order.map(s=>`<span style="flex:${cnt.get(s)};background:${stageColor(s)}"></span>`).join('')}</span>`;PROJ=prev;
+  return `<div class="prow${PROJ&&PROJ.id===p.id?' cur':''}"><button type="button" class="row" data-open="${esc(p.id)}">${IC_LAYERS}<span>${esc(p.name)}<small>${num(n)} ${T('обекта','sites')}${miss?` · ${num(miss)} ${T('не са в базата','not in database')}`:''}</small>${bar}</span></button><button type="button" class="mini" data-pm="${esc(p.id)}" aria-label="${T('Действия','Actions')}">${IC.dots}</button></div>`;};
+ const p=sheet(T('Списъци','Lists'),`
+ <div class="group"><button type="button" class="row${PROJ?'':' cur'}" data-open="">${IC.table}<span>${T('Всички обекти','All sites')}<small>${num(G.length)} ${T('обекта – общата база','sites – the main database')}</small></span></button></div>
+ <div class="gl">${T('Проекти','Projects')}</div>
+ ${ps.length?`<div class="group">${ps.map(row).join('')}</div>`:`<p class="sub">${T('Още няма проекти. Проектът е Excel със Site ID и твои колони, например Етап, Дата, Бележка. Координатите и всичко останало идват от общата база.','No projects yet. A project is an Excel file with Site ID and your own columns, e.g. Stage, Date, Note. Coordinates and everything else come from the main database.')}</p>`}
+ <button class="btn sec" type="button" id="pNew">${IC.plus}${T('Нов проект от Excel','New project from Excel')}</button>`);
+ p.addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]');if(o){closeSheet();setProject(o.dataset.open||null);return;}
+  const m=e.target.closest('[data-pm]');if(m){openProjActions(m.dataset.pm);return;}
+  if(e.target.closest('#pNew')){PIMP={mode:'new'};closeSheet();$('#fileProj').value='';$('#fileProj').click();}
+ });
+}
+function openProjActions(id){
+ const pr=PROJECTS.find(p=>p.id===id);if(!pr)return;
+ const p=sheet(pr.name,`<div class="group">
+  <button class="row" type="button" data-a="up">${IC.table}<span>${T('Обнови от Excel','Update from Excel')}<small>${T('Нови обекти и промени в колоните на проекта','New sites and changes to the project columns')}</small></span></button>
+  <button class="row" type="button" data-a="ren">${IC.edit}<span>${T('Преименувай','Rename')}</span></button>
+  <button class="row" type="button" data-a="share">${IC.share}<span>${T('Сподели само този проект','Share only this project')}<small>${T('Заключен пакет с проекта и обектите му','Locked package with the project and its sites')}</small></span></button>
+  <button class="row danger" type="button" data-a="del">${IC.trash}<span>${T('Изтрий проекта','Delete project')}<small>${T('Обектите в общата база остават','Sites in the main database stay')}</small></span></button></div>
+  <div id="paX"></div>`);
+ p.addEventListener('click',async e=>{const a=e.target.closest('[data-a]');if(!a)return;
+  if(a.dataset.a==='up'){PIMP={mode:'update',proj:pr};closeSheet();$('#fileProj').value='';$('#fileProj').click();}
+  else if(a.dataset.a==='ren'){p.querySelector('#paX').innerHTML=`<label class="f">${T('Име на проекта','Project name')}<input class="inp" id="pRen" value="${esc(pr.name)}"></label><button class="btn" type="button" id="pRenGo">${T('Запази','Save')}</button>`;
+   p.querySelector('#pRenGo').onclick=async()=>{const v=p.querySelector('#pRen').value.trim();if(!v)return;pr.name=v;pr.u=now();pr.by=META.author;await persistProjects();renderProjHead();closeSheet();toast(T('Запазено','Saved'));};}
+  else if(a.dataset.a==='share'){openExport(pr.id);}
+  else if(a.dataset.a==='del'){if(!a.dataset.sure){a.dataset.sure=1;a.querySelector('span').firstChild.textContent=T('Натисни пак за изтриване','Tap again to delete');return;}
+   pr.del=1;pr.u=now();pr.by=META.author;await persistProjects();if(PROJ&&PROJ.id===pr.id)setProject(null);closeSheet();toast(T('Проектът е изтрит','Project deleted'));}
+ });
+}
+// quick edit of the project columns of one site (tap the stage tag)
+function openProjEdit(idU){
+ if(!PROJ)return;const it=PROJ.items[idU];if(!it)return;
+ const vals=c=>[...new Set(Object.values(PROJ.items).filter(x=>!x.del).map(x=>String((x.x||{})[c.id]??'').trim()).filter(Boolean))].slice(0,60);
+ const cols=[...PROJ.cols].sort((a,b)=>(b.id===PROJ.stageCol)-(a.id===PROJ.stageCol));
+ const p=sheet(`${idU} · ${PROJ.name}`,cols.map(c=>`<label class="f">${esc(c.name)}${c.id===PROJ.stageCol?` <small class="sub">(${T('етап','stage')})</small>`:''}<input class="inp" data-pc="${esc(c.id)}" list="dlp_${esc(c.id)}" value="${esc((it.x||{})[c.id]??'')}" autocomplete="off"><datalist id="dlp_${esc(c.id)}">${vals(c).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></label>`).join('')+
+  (PROJ.stageCol?`<div class="seg" id="pStQ">${PROJ.stages.map(s=>`<button type="button" data-v="${esc(s)}" style="--sc:${stageColor(s)}" class="stq">${esc(s)}</button>`).join('')}</div>`:'')+
+  `<div class="actions"><button class="btn sec" type="button" data-close>${T('Отказ','Cancel')}</button><button class="btn" type="button" id="pSave">${T('Запази','Save')}</button></div>`);
+ const q3=p.querySelector('#pStQ');if(q3)q3.onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;p.querySelector(`[data-pc="${CSS.escape(PROJ.stageCol)}"]`).value=b.dataset.v;};
+ p.querySelector('#pSave').onclick=async()=>{
+  const x={...(it.x||{})};p.querySelectorAll('[data-pc]').forEach(i=>{const v=i.value.trim();if(v)x[i.dataset.pc]=v;else delete x[i.dataset.pc];});
+  const st=PROJ.stageCol?String(x[PROJ.stageCol]??'').trim():'';if(st&&!PROJ.stages.includes(st)){PROJ.stages.push(st);PROJ.u=now();}
+  PROJ.items[idU]={...it,x,u:now(),by:META.author,del:0};await persistProjects();closeSheet();search();toast(T('Запазено','Saved'));};
+}
+// ---------- project import from Excel
+let PIMP=null;
+async function readWorkbook(f){
+ await loadXLSX();
+ if(/\.(csv|txt)$/i.test(f.name)){const buf=new Uint8Array(await f.arrayBuffer());let txt=new TextDecoder('utf-8').decode(buf);
+  if((txt.match(/�/g)||[]).length>3){try{txt=new TextDecoder('windows-1251').decode(buf);}catch(_){}}
+  return XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true});}
+ return XLSX.read(await f.arrayBuffer(),{type:'array'});}
+const RX_STAGE=/stage|етап|status|статус|фаза|phase|state|състояние/i;
+$('#fileProj').addEventListener('change',async e=>{const f=e.target.files[0];if(!f||!PIMP)return;busy(T('Чета файла','Reading the file'));
+ try{const wb=await readWorkbook(f);const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:false,blankrows:false});
+  let h=rows.findIndex(r=>r.filter(c=>String(c).trim()!=='').length>=1);if(h<0)h=0;
+  const width=Math.max(...rows.slice(h,h+50).map(r=>r.length),1);
+  PIMP.header=Array.from({length:width},(_,i)=>String((rows[h]||[])[i]??'').trim()||(T('Колона ','Column ')+(i+1)));
+  PIMP.data=rows.slice(h+1).filter(r=>r.some(c=>String(c).trim()!==''));
+  PIMP.fname=f.name.replace(/\.[^.]+$/,'');
+  const idRe=GUESS.find(g=>g[0]==='id')[1];
+  PIMP.idCol=Math.max(0,PIMP.header.findIndex(x=>idRe.test(x)));
+  if(PIMP.mode==='update'){const sc=PIMP.proj.cols.find(c=>c.id===PIMP.proj.stageCol);PIMP.stCol=sc?PIMP.header.findIndex(x=>norm(x)===norm(sc.name)):-1;}
+  else PIMP.stCol=PIMP.header.findIndex((x,i)=>i!==PIMP.idCol&&RX_STAGE.test(x));
+  PIMP.use=new Set(PIMP.header.map((_,i)=>i).filter(i=>i!==PIMP.idCol&&!IGNORE_COL.test(PIMP.header[i])));
+  openProjMap();
+ }catch(err){closeSheet();toast(T('Файлът не може да се прочете. Провери дали е Excel или CSV.','The file cannot be read. Check that it is Excel or CSV.'));}
+});
+function openProjMap(){
+ const P=PIMP,upd=P.mode==='update';
+ const opts=sel=>P.header.map((h,i)=>`<option value="${i}" ${sel===i?'selected':''}>${esc(h)}</option>`).join('');
+ const p=sheet(upd?T('Обнови: ','Update: ')+P.proj.name:T('Нов проект','New project'),`
+ ${upd?'':`<label class="f">${T('Име на проекта','Project name')}<input class="inp" id="pjName" value="${esc(P.fname)}"></label>`}
+ <label class="f">Site ID<select class="inp" id="pjId">${opts(P.idCol)}</select></label>
+ <label class="f">${T('Колона с етапа','Stage column')}<select class="inp" id="pjSt"><option value="-1">${T('— няма —','— none —')}</option>${opts(P.stCol)}</select></label>
+ <div class="gl">${T('Колони на проекта','Project columns')}</div>
+ ${P.header.map((h,i)=>i===P.idCol?'':`<label class="check"><input type="checkbox" data-pu="${i}" ${P.use.has(i)?'checked':''}><span>${esc(h)}${P.data[0]&&String(P.data[0][i]??'').trim()?` <small class="sub">· ${esc(String(P.data[0][i]).slice(0,30))}</small>`:''}</span></label>`).join('')}
+ <div id="pjPrev"></div>
+ <div class="actions"><button class="btn sec" type="button" data-close>${T('Отказ','Cancel')}</button><button class="btn" type="button" id="pjGo">${upd?T('Обнови проекта','Update project'):T('Създай проекта','Create project')}</button></div>`);
+ const prev=()=>{
+  P.idCol=+p.querySelector('#pjId').value;P.stCol=+p.querySelector('#pjSt').value;
+  P.use=new Set([...p.querySelectorAll('[data-pu]')].filter(c=>c.checked).map(c=>+c.dataset.pu).filter(i=>i!==P.idCol));
+  if(P.stCol>=0)P.use.add(P.stCol);
+  const inBase=new Set(G.map(g=>pid(L[g[0]].id)));
+  const ids=[...new Set(P.data.map(r=>pid(r[P.idCol])).filter(Boolean))];const miss=ids.filter(id=>!inBase.has(id));
+  let gone=[];if(upd){const s=new Set(ids);gone=Object.entries(P.proj.items).filter(([id,it])=>!it.del&&!s.has(id)).map(([id])=>id);}
+  P.ids=ids;P.gone=gone;
+  p.querySelector('#pjPrev').innerHTML=`<div class="sum"><div class="good"><span>${T('Обекти във файла','Sites in the file')}</span><b>${num(ids.length)}</b></div><div><span>${T('Намерени в общата база','Found in the main database')}</span><b>${num(ids.length-miss.length)}</b></div>${miss.length?`<div class="bad"><span>${T('Не са в базата','Not in the database')}</span><b>${num(miss.length)}</b></div>`:''}</div>
+  ${miss.length?`<p class="sub">${T('Не са намерени: ','Not found: ')}${esc(miss.slice(0,10).join(', '))}${miss.length>10?' …':''}</p>`:''}
+  ${gone.length?`<label class="check"><input type="checkbox" id="pjGone"><span>${T('Махни от проекта ','Remove from the project ')}${num(gone.length)} ${T('обекта, които ги няма във файла','sites that are not in the file')}</span></label>`:''}`;
+  p.querySelector('#pjGo').disabled=!ids.length;};
+ p.addEventListener('change',prev);prev();
+ p.querySelector('#pjGo').onclick=async()=>{
+  const t=now(),by=META.author;let pr=upd?P.proj:{id:'p'+t.toString(36)+Math.random().toString(36).slice(2,5),name:(p.querySelector('#pjName').value.trim()||P.fname),stageCol:null,cols:[],stages:[],items:{},u:t,by,del:0};
+  const colId={};for(const i of P.use){const nm=P.header[i];let c=pr.cols.find(c=>norm(c.name)===norm(nm));if(!c){c={id:'c'+t.toString(36)+i,name:nm};pr.cols.push(c);}colId[i]=c.id;}
+  if(P.stCol>=0)pr.stageCol=colId[P.stCol];
+  for(const row of P.data){const id=pid(row[P.idCol]);if(!id)continue;const it=pr.items[id]||{x:{},u:0};const x={...(it.x||{})};
+   for(const i of P.use){const v=String(row[i]??'').trim();if(v)x[colId[i]]=v;else if(upd)delete x[colId[i]];}
+   if(pr.stageCol){const s=String(x[pr.stageCol]??'').trim();if(s&&!pr.stages.includes(s))pr.stages.push(s);}
+   pr.items[id]={x,u:t,by,del:0};}
+  if(upd&&P.gone.length&&p.querySelector('#pjGone')?.checked)for(const id of P.gone)pr.items[id]={...pr.items[id],u:t,by,del:1};
+  pr.u=t;pr.by=by;if(!upd)PROJECTS.push(pr);
+  await persistProjects();closeSheet();setProject(pr.id);
+  toast(upd?T('Проектът е обновен','Project updated'):T('Проектът е създаден','Project created'));PIMP=null;};
+}
+// ---------- merging projects from a package
+function planProjects(inc){const out={add:0,upd:0,ap:[]};
+ for(const p of inc||[]){if(!p||!p.id||!p.items)continue;const c=PROJECTS.find(x=>x.id===p.id);
+  if(!c){out.ap.push(p);if(!p.del)out.add++;continue;}
+  let ch=(p.u||0)>(c.u||0);for(const [id,it] of Object.entries(p.items)){const ci=c.items[id];if(!ci||(it.u||0)>(ci.u||0)){ch=true;}}
+  if(ch){out.ap.push(p);out.upd++;}}
+ return out;}
+function applyProjects(ap){
+ for(const p of ap){const c=PROJECTS.find(x=>x.id===p.id);
+  const clean={id:String(p.id),name:String(p.name||'Проект'),stageCol:p.stageCol||null,cols:Array.isArray(p.cols)?p.cols.map(c=>({id:String(c.id),name:String(c.name)})):[],stages:Array.isArray(p.stages)?p.stages.map(String):[],items:{},u:p.u||0,by:p.by||'',del:p.del?1:0};
+  for(const [id,it] of Object.entries(p.items||{})){const x={};for(const [k,v] of Object.entries(it.x||{}))if(v!==null&&v!==undefined&&String(v)!=='')x[String(k)]=String(v);clean.items[pid(id)]={x,u:it.u||0,by:it.by||'',del:it.del?1:0};}
+  if(!c){PROJECTS.push(clean);continue;}
+  if((clean.u||0)>(c.u||0)){c.name=clean.name;c.stageCol=clean.stageCol;c.del=clean.del;c.u=clean.u;c.by=clean.by;}
+  for(const col of clean.cols)if(!c.cols.some(x=>x.id===col.id))c.cols.push(col);
+  for(const s of clean.stages)if(!c.stages.includes(s))c.stages.push(s);
+  for(const [id,it] of Object.entries(clean.items)){const ci=c.items[id];if(!ci||(it.u||0)>(ci.u||0))c.items[id]=it;}}
+}
+
+
 /* ====================== legend / help ====================== */
 function openHelp(focus){
  const cs=getComputedStyle(document.documentElement);
@@ -1099,6 +1307,7 @@ function openHelp(focus){
   li('<span class="id role-solo">SOF0001</span>',T('<b>Тъмен номер</b> – самостоятелен обект, без колокация.','<b>Dark ID</b> – standalone site, no colocation.'))+
   li('<span class="id role-solo"><span class="onair"></span>ID</span>',T('<b>Зелена точка</b> в номера – обектът е On Air.','<b>Green dot</b> in the ID – the site is On Air.'))+
   li(`<span class="acclock">${IC_LOCK}</span>`,T('<b>Червен катинар</b> – нужен е достъп (колона Site Access). Подробностите са в „Детайли“.','<b>Red lock</b> – access is required (Site Access column). Details are under “Details”.'))+
+  li('<span class="stg" style="--sc:#1a73e8">Монтаж</span>',T('<b>Цветен етикет с етап</b> – само в проект. Натисни го, за да смениш етапа и колоните на проекта.','<b>Coloured stage tag</b> – only in a project. Tap it to change the stage and the project columns.'))+
   li('<span class="stype">Rooftop</span>',T('<b>Етикет до името</b> – типът на обекта (Site Type).','<b>Tag next to the name</b> – the site type (Site Type).'))+
   li(`<span class="lgic">${IC_COLO}</span>`,T('<b>Колокация</b> – домакин / гости. Удебелено е нашият номер или оператор.','<b>Colocation</b> – host / guests. Bold is our ID or operator.'))+
   li(`<span class="lgic">${IC_PERSON}</span>`,T('<b>Контакт</b> – лице, телефон и имейл. Телефонът звъни, имейлът отваря пощата.','<b>Contact</b> – person, phone and e-mail. Tap the phone to call, the e-mail to write.'))+
@@ -1119,7 +1328,7 @@ $('#mapHelp').onclick=()=>{const m=$('#mapView');m.style.zIndex='19';openHelp('m
 
 /* ====================== filters ====================== */
 // within one field the ticked values are OR-ed; different fields are AND-ed; everything combines with the search
-let FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{}};
+let FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{},stage:[],pf:{}};
 const regOf=i=>String(L[i].id).trim().slice(0,3).toUpperCase();
 const EMPTY='\u0000';
 function saveFlt(){try{localStorage.setItem('flt',JSON.stringify(FLT))}catch(e){}}
@@ -1132,10 +1341,17 @@ function passes(i){
  for(const [fid,c] of Object.entries(FLT.f)){const v=xv(i,fid);
   if(c.mode==='filled'&&!v)return false;if(c.mode==='empty'&&v)return false;
   if(c.vals&&c.vals.length&&!c.vals.includes(v||EMPTY))return false;}
+ if(PROJ){const it=projItem(L[i]);if(!it||it.del)return false;
+  if(FLT.stage&&FLT.stage.length&&!FLT.stage.includes(stageOf(it)||EMPTY))return false;
+  for(const [cid,c] of Object.entries(FLT.pf||{})){const v=String((it.x||{})[cid]??'').trim();
+   if(c.mode==='filled'&&!v)return false;if(c.mode==='empty'&&v)return false;if(c.vals&&c.vals.length&&!c.vals.includes(v||EMPTY))return false;}}
  if(FLT.dist&&me&&km(me,L[i])>FLT.dist)return false;
  return true;}
 function activeFilters(){const a=[];const D=liveDefs();
  if(FLT.dist)a.push(['dist',`До ${FLT.dist} км от мен`]);
+ if(PROJ&&FLT.stage&&FLT.stage.length)a.push(['stage',T('Етап: ','Stage: ')+FLT.stage.map(v=>v===EMPTY?T('без етап','no stage'):v).join(', ')]);
+ if(PROJ)for(const [cid,c] of Object.entries(FLT.pf||{})){const col=PROJ.cols.find(x=>x.id===cid);if(!col)continue;
+  a.push(['pf:'+cid,`${col.name}: ${c.mode==='filled'?T('попълнено','filled in'):c.mode==='empty'?T('празно','empty'):(c.vals||[]).map(v=>v===EMPTY?T('празно','empty'):v).join(', ')}`]);}
  if(FLT.reg&&FLT.reg.length)a.push(['reg','Район '+FLT.reg.join(', ')]);
  if(FLT.role&&FLT.role.length)a.push(['role',FLT.role.map(roleName).join(', ')]);
  if(FLT.place.length)a.push(['place',FLT.place.map(v=>v===EMPTY?'без населено място':v).join(', ')]);
@@ -1144,14 +1360,14 @@ function activeFilters(){const a=[];const D=liveDefs();
   if(c.mode==='filled')a.push(['f:'+fid,`${d.name}: попълнено`]);else if(c.mode==='empty')a.push(['f:'+fid,`${d.name}: празно`]);
   else if(c.vals&&c.vals.length)a.push(['f:'+fid,`${d.name}: ${c.vals.map(v=>v===EMPTY?'празно':v).join(', ')}`]);}
  return a;}
-function clearFilter(k){if(k==='dist')FLT.dist=0;else if(k==='reg')FLT.reg=[];else if(k==='role')FLT.role=[];else if(k==='place')FLT.place=[];else if(k==='obl')FLT.obl=[];else delete FLT.f[k.slice(2)];saveFlt();}
+function clearFilter(k){if(k==='stage')FLT.stage=[];else if(k.startsWith('pf:')){FLT.pf=FLT.pf||{};delete FLT.pf[k.slice(3)];}else if(k==='dist')FLT.dist=0;else if(k==='reg')FLT.reg=[];else if(k==='role')FLT.role=[];else if(k==='place')FLT.place=[];else if(k==='obl')FLT.obl=[];else delete FLT.f[k.slice(2)];saveFlt();}
 function renderPills(){const a=activeFilters(),box=$('#fPills'),b=$('#fBadge');
  b.hidden=!a.length;b.textContent=a.length;box.hidden=!a.length;
  box.innerHTML=a.map(([k,txt])=>`<button class="pill" type="button" data-fk="${esc(k)}" aria-label="Махни филтъра ${esc(txt)}"><span>${esc(txt)}</span>${IC.x}</button>`).join('')+(a.length>1?'<button class="pill clear" type="button" data-fk="*">Изчисти всички</button>':'');}
 $('#fPills').addEventListener('click',e=>{const p=e.target.closest('[data-fk]');if(!p)return;
- if(p.dataset.fk==='*'){FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{}};saveFlt();}else clearFilter(p.dataset.fk);search();});
+ if(p.dataset.fk==='*'){FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{},stage:[],pf:{}};saveFlt();}else clearFilter(p.dataset.fk);search();});
 // how many sites have each value (a site counts once even with several options)
-function facet(get){const c=new Map();G.forEach(pts=>{const s=new Set(pts.map(i=>get(i)||EMPTY));s.forEach(v=>c.set(v,(c.get(v)||0)+1));});
+function facet(get){const c=new Map();G.forEach(pts=>{if(!projIn(pts))return;const s=new Set(pts.map(i=>get(i)||EMPTY));s.forEach(v=>c.set(v,(c.get(v)||0)+1));});
  return [...c.entries()].sort((a,b)=>(a[0]===EMPTY)-(b[0]===EMPTY)||b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),'bg'));}
 function vlist(key,entries,selected,emptyLabel){
  return `${entries.length>10?`<input class="inp" type="search" data-vf="${esc(key)}" placeholder="Търси в списъка…" autocomplete="off">`:''}
@@ -1163,6 +1379,12 @@ function openFilters(){
  let h=`<div class="fsec"><h3>Разстояние от мен${FLT.dist?'<button type="button" data-clr="dist">Махни</button>':''}</h3>
   <div class="seg" data-seg="dist">${[0,1,5,10,25,50].map(d=>`<button type="button" data-v="${d}" aria-pressed="${FLT.dist===d}">${d?'до '+d+' км':'Без ограничение'}</button>`).join('')}</div>
   ${FLT.dist&&!me?'<p class="sub">Търся местоположението…</p>':''}</div>`;
+ if(PROJ){const sf=facet(i=>stageOf(projItem(L[i])));
+  if(sf.length)h+=`<div class="fsec"><h3>${T('Етап','Stage')} <small>${esc(PROJ.name)}</small>${(FLT.stage||[]).length?'<button type="button" data-clr="stage">Махни</button>':''}</h3>${vlist('stage',sf.sort((a,b)=>(PROJ.stages.indexOf(a[0])+1||99)-(PROJ.stages.indexOf(b[0])+1||99)),FLT.stage||[],T('без етап','no stage'))}</div>`;
+  for(const col of projCols()){const f=facet(i=>String((projItem(L[i])?.x||{})[col.id]??'').trim()),filled=f.filter(([v])=>v!==EMPTY);if(!filled.length)continue;const c=(FLT.pf||{})[col.id]||{};
+   const clr=(FLT.pf||{})[col.id]?`<button type="button" data-clr="pf:${esc(col.id)}">Махни</button>`:'';
+   if(filled.length<=25)h+=`<div class="fsec"><h3>${esc(col.name)} <small>${esc(PROJ.name)}</small>${clr}</h3>${vlist('pf:'+col.id,f,c.vals||[],T('празно','empty'))}</div>`;
+   else h+=`<div class="fsec"><h3>${esc(col.name)} <small>${esc(PROJ.name)}</small>${clr}</h3><div class="seg" data-seg="pf:${esc(col.id)}">${[['',T('Всички','All')],['filled',T('Попълнено','Filled in')],['empty',T('Празно','Empty')]].map(([m,l])=>`<button type="button" data-v="${m}" aria-pressed="${(c.mode||'')===m}">${l}</button>`).join('')}</div></div>`;}}
  const rl=facet(i=>coloOf(L[i]).role);
  if(rl.length>1||(rl[0]&&rl[0][0]!=='solo'))h+=`<div class="fsec"><h3>Колокация${FLT.role.length?'<button type="button" data-clr="role">Махни</button>':''}</h3><div class="vlist" data-vl="role">${['host','guest','colo','solo'].map(k=>[k,(rl.find(x=>x[0]===k)||[,0])[1]]).filter(([k,n])=>n).map(([k,n])=>`<label><input type="checkbox" data-k="role" value="${k}" ${FLT.role.includes(k)?'checked':''}><span class="v"><span class="rdot id role-${k}"></span> ${esc(roleName(k))}</span><span class="cnt">${num(n)}</span></label>`).join('')}</div></div>`;
  if(rg.length>1)h+=`<div class="fsec"><h3>Район <small>първите 3 букви на Site ID</small>${FLT.reg.length?'<button type="button" data-clr="reg">Махни</button>':''}</h3>${vlist('reg',rg,FLT.reg,'')}</div>`;
@@ -1181,7 +1403,7 @@ function openFilters(){
  const upd=()=>{search();p.querySelector('#fShow').textContent=`Покажи ${num(res.length)} обекта`;};upd();
  p.addEventListener('change',e=>{const cb=e.target.closest('input[type=checkbox][data-k]');if(!cb)return;
   const k=cb.dataset.k,vals=[...p.querySelectorAll(`input[data-k="${CSS.escape(k)}"]:checked`)].map(x=>x.value);
-  if(k==='role')FLT.role=vals;else if(k==='reg')FLT.reg=vals;else if(k==='place')FLT.place=vals;else if(k==='obl')FLT.obl=vals;else{const fid=k.slice(2);if(vals.length)FLT.f[fid]={vals};else delete FLT.f[fid];}
+  if(k==='stage')FLT.stage=vals;else if(k.startsWith('pf:')){FLT.pf=FLT.pf||{};const cid=k.slice(3);if(vals.length)FLT.pf[cid]={vals};else delete FLT.pf[cid];}else if(k==='role')FLT.role=vals;else if(k==='reg')FLT.reg=vals;else if(k==='place')FLT.place=vals;else if(k==='obl')FLT.obl=vals;else{const fid=k.slice(2);if(vals.length)FLT.f[fid]={vals};else delete FLT.f[fid];}
   saveFlt();upd();});
  p.addEventListener('input',e=>{const s=e.target.closest('[data-vf]');if(!s)return;const qq=norm(s.value.trim()),ql=tl(qq);
   p.querySelectorAll(`[data-vl="${CSS.escape(s.dataset.vf)}"] label`).forEach(l=>{l.hidden=!!qq&&!l.dataset.lbl.includes(qq)&&!l.dataset.lbl.includes(ql);});});
@@ -1189,10 +1411,11 @@ function openFilters(){
   const sb=e.target.closest('.seg button');
   if(sb){const k=sb.parentElement.dataset.seg,v=sb.dataset.v;
    if(k==='dist'){FLT.dist=+v;if(FLT.dist&&!(near&&near.type==='me'))startMe(true);}
+   else if(k.startsWith('pf:')){FLT.pf=FLT.pf||{};const cid=k.slice(3);if(v)FLT.pf[cid]={mode:v};else delete FLT.pf[cid];}
    else{const fid=k.slice(2);if(v)FLT.f[fid]={mode:v};else delete FLT.f[fid];}
    sb.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===sb));saveFlt();upd();return;}
   const cl=e.target.closest('[data-clr]');if(cl){clearFilter(cl.dataset.clr);openFilters();return;}
-  if(e.target.closest('#fClear')){FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{}};saveFlt();openFilters();return;}
+  if(e.target.closest('#fClear')){FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{},stage:[],pf:{}};saveFlt();openFilters();return;}
   if(e.target.closest('#fShow')){closeSheet();window.scrollTo(0,0);}
  });
 }
@@ -1209,6 +1432,7 @@ list.addEventListener('click',async e=>{
  if(o&&art){const k=+art.dataset.k;sel.set(res[k].g,+o.dataset.p);art.outerHTML=card(k);return;}
  const nb=e.target.closest('[data-near]');
  if(nb){const r=L[KEYI.get(nb.dataset.near)];if(!r)return;stopMe();near={type:'site',k:r.k,lat:r.lat,lon:r.lon,id:r.id,name:r.name};q.value='';curTerms=[];search();window.scrollTo(0,0);return;}
+ const pe=e.target.closest('[data-pedit]');if(pe){openProjEdit(pe.dataset.pedit);return;}
  const rtb=e.target.closest('.rtb');if(rtb){toggleRoute(rtb.dataset.rt);rerenderCard(rtb.dataset.rt);toast(inRoute(rtb.dataset.rt)?T('Добавен в маршрута','Added to route'):T('Махнат от маршрута','Removed from route'));return;}
  const act=e.target.closest('[data-act]');if(act){openActions(act.dataset.act);return;}
  const b=e.target.closest('.cp');if(!b)return;
@@ -1239,6 +1463,8 @@ function openMenu(){
  const p=sheet('База',`
  <div class="stats"><div class="stat"><b>${num(G.length)}</b><span>обекта</span></div><div class="stat"><b>${num(L.length)}</b><span>точки</span></div><div class="stat"><b>${ops}</b><span>собственици</span></div></div>
  <p class="sub">Последна промяна: ${fmtDate(META.changed)}${META.lastPkg?` · последен пакет от ${esc(META.lastPkg.by||'неизвестен')} (${fmtDate(META.lastPkg.created)})`:''}</p>
+ <div class="gl">${T('Списъци','Lists')}</div>
+ <div class="group"><button class="row" type="button" data-go="projects">${IC_LAYERS}<span>${T('Проекти','Projects')}<small>${liveProjects().length?liveProjects().map(p=>esc(p.name)).join(', '):T('Списъци с обекти и етапи от Excel','Lists of sites with stages from Excel')}</small></span></button></div>
  <div class="gl">Добавяне</div>
  <div class="group">
   <button class="row" type="button" data-go="add">${IC.plus}<span>Добави обект<small>Ръчно или от текущото място</small></span></button>
@@ -1270,6 +1496,7 @@ function openSource(what){
  else if(what==='wipe')openWipe();
  else if(what==='fields')openFields();
  else if(what==='help')openHelp();
+ else if(what==='projects')openProjects();
 }
 function openWipe(){
  const p=sheet('Изтриване на всички данни',`<p class="sub">Ще изтрие всички ${num(L.length)} точки от този телефон. Ако нямаш пакет, няма да можеш да ги върнеш.</p>
@@ -1277,7 +1504,7 @@ function openWipe(){
  <div class="actions"><button class="btn sec" type="button" data-close>Отказ</button><button class="btn danger" type="button" id="wipeGo" disabled>Изтрий</button></div>`);
  const i=p.querySelector('#wipeIn'),b=p.querySelector('#wipeGo');
  i.oninput=()=>b.disabled=i.value.trim().toUpperCase()!==(LANG==='en'?'DELETE':'ИЗТРИЙ');
- b.onclick=async()=>{ALL=[];META.lastPkg=null;META.maps={};await persist();rebuild();closeSheet();search();toast('Всички данни са изтрити');};
+ b.onclick=async()=>{ALL=[];PROJECTS=[];PROJ=null;META.lastPkg=null;META.maps={};await persist();await persistProjects();renderProjHead();rebuild();closeSheet();search();toast('Всички данни са изтрити');};
 }
 
 /* ====================== record actions ====================== */
@@ -1584,9 +1811,11 @@ function pwFields(confirm){return `<label class="f">Парола<input class="in
  ${confirm?'<label class="f">Повтори паролата<input class="inp" id="pw2" type="password" autocomplete="new-password" value="'+esc(META.pw||'')+'"></label>':''}
  <label class="check"><input type="checkbox" id="pwKeep" ${META.pw?'checked':''}><span>Запомни паролата на този телефон</span></label>`;}
 async function keepPw(p,pw){META.pw=p.querySelector('#pwKeep').checked?pw:'';await idb.set('meta',META);}
-function openExport(){
+function openExport(onlyProj){
+ const ps=liveProjects();let only=onlyProj||'';
  const p=sheet('Сподели заключен пакет',`<p class="sub">Целият файл с ${num(L.length)} точки се заключва с парола. Без нея не може да се отвори. Кажи паролата на колегите отделно, не в същото съобщение.</p>
  ${META.author?'':'<div class="msg">Попълни името си в менюто „База“, за да се вижда кой е правил промените.</div>'}
+ ${ps.length?`<label class="f">${T('Какво да съдържа пакетът','What the package contains')}<select class="inp" id="xWhat"><option value="">${T('Цялата база и всички проекти','The whole database and all projects')}</option>${ps.map(p=>`<option value="${esc(p.id)}" ${only===p.id?'selected':''}>${T('Само проект: ','Only project: ')}${esc(p.name)}</option>`).join('')}</select></label>`:''}
  ${pwFields(true)}<div id="xMsg"></div>
  <div class="actions"><button class="btn sec" type="button" data-close>Отказ</button><button class="btn" type="button" id="xGo">${IC.share}Сподели</button></div>`);
  p.querySelector('#xGo').onclick=async()=>{
@@ -1595,7 +1824,8 @@ function openExport(){
   if(pw!==pw2){m.innerHTML='<div class="msg err">Паролите не съвпадат.</div>';return;}
   await keepPw(p,pw);m.innerHTML='<div class="sub" style="display:flex;gap:10px;align-items:center"><span class="spin"></span>Заключвам…</div>';
   try{
-   const t=now();const txt=await seal({created:t,by:META.author,sites:ALL,defs:DEFS},pw);
+   const t=now();only=p.querySelector('#xWhat')?.value||'';const pr=only?PROJECTS.find(x=>x.id===only):null;
+   const txt=await seal(pr?{created:t,by:META.author,sites:ALL.filter(r=>pr.items[pid(r.id)]),defs:DEFS,projects:[pr]}:{created:t,by:META.author,sites:ALL,defs:DEFS,projects:PROJECTS},pw);
    const d=new Date(t),name=`obekti-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
    const file=new File([txt],name,{type:'application/json'});
    // the share menu needs a fresh tap, so the ready package gets its own buttons
@@ -1642,13 +1872,13 @@ function planDefs(inc){const map=new Map(DEFS.map(d=>[d.id,d]));const ap=[];let 
   if(!c){ap.push(d);if(!d.del)add++;}else if((d.u||0)>(c.u||0))ap.push(d);}
  return {ap,add};}
 function openMergePreview(pkg){
- const plan=planMerge(pkg.sites||[]);const pd=planDefs(pkg.defs);
+ const plan=planMerge(pkg.sites||[]);const pd=planDefs(pkg.defs);const pp=planProjects(pkg.projects);
  const p=sheet('Сливане с твоята база',`<p class="sub">Пакет от <b>${esc(pkg.by||'неизвестен')}</b>, направен ${fmtDate(pkg.created)} · ${num((pkg.sites||[]).filter(r=>!r.del).length)} точки</p>
  <div class="sum"><div class="good"><span>Нови за теб</span><b>${num(plan.add)}</b></div><div class="chg"><span>Обновени (по-нова промяна в пакета)</span><b>${num(plan.upd)}</b></div>
  <div class="bad"><span>Изтрити от колегата</span><b>${num(plan.rm)}</b></div><div><span>Твоите по-нови промени, които остават</span><b>${num(plan.mine)}</b></div>
- ${pd.ap.length?`<div><span>Полета: нови или променени</span><b>${num(pd.ap.length)}</b></div>`:''}</div>
+ ${pd.ap.length?`<div><span>Полета: нови или променени</span><b>${num(pd.ap.length)}</b></div>`:''}${pp.ap.length?`<div><span>${T('Проекти: нови / обновени','Projects: new / updated')}</span><b>${num(pp.add)} / ${num(pp.upd)}</b></div>`:''}</div>
  <p class="sub">Нищо от твоята база не се губи. При един и същ обект остава по-новата промяна. След сливането можеш да споделиш обновения пакет.</p>
- <div class="actions"><button class="btn sec" type="button" data-close>Отказ</button><button class="btn" type="button" id="gGo" ${plan.apply.length+pd.ap.length?'':'disabled'}>${plan.apply.length+pd.ap.length?'Слей':'Няма нищо ново'}</button></div>`);
+ <div class="actions"><button class="btn sec" type="button" data-close>Отказ</button><button class="btn" type="button" id="gGo" ${plan.apply.length+pd.ap.length+pp.ap.length?'':'disabled'}>${plan.apply.length+pd.ap.length+pp.ap.length?'Слей':'Няма нищо ново'}</button></div>`);
  p.querySelector('#gGo').onclick=async()=>{
   const idx=new Map(ALL.map((r,i)=>[r.k,i]));
   for(const d of pd.ap){const rec={id:String(d.id),name:String(d.name),type:d.type,opts:Array.isArray(d.opts)?d.opts.map(String):[],badge:d.badge?1:0,warn:d.warn?1:0,ord:+d.ord||0,u:d.u||0,by:d.by||'',del:d.del?1:0};
@@ -1656,6 +1886,7 @@ function openMergePreview(pkg){
   for(const r of plan.apply){const x={};if(r.x&&typeof r.x==='object')for(const [k,v] of Object.entries(r.x))if(v!==null&&v!==undefined&&String(v)!=='')x[String(k)]=String(v);
    const rec={k:r.k,id:r.id,name:r.name||'',addr:r.addr||'',own:r.own||'',opt:r.opt||null,lat:+r.lat,lon:+r.lon,x,u:r.u||0,by:r.by||'',del:r.del?1:0};
    const i=idx.get(r.k);if(i===undefined){idx.set(r.k,ALL.length);ALL.push(rec);}else ALL[i]=rec;}
+  if(pp.ap.length){applyProjects(pp.ap);await persistProjects();}
   META.lastPkg={by:pkg.by,created:pkg.created};
   await persist();rebuild();closeSheet();search();toast(`Слято: ${plan.add} нови, ${plan.upd} обновени${plan.rm?`, ${plan.rm} изтрити`:''}`);
  };
@@ -1663,7 +1894,7 @@ function openMergePreview(pkg){
 
 /* ====================== start ====================== */
 (async()=>{
- try{await idb.open();ALL=(await idb.get('sites'))||[];META={...META,...((await idb.get('meta'))||{})};DEFS=(await idb.get('defs'))||DEFAULT_DEFS.map(d=>({...d}));}
+ try{await idb.open();ALL=(await idb.get('sites'))||[];META={...META,...((await idb.get('meta'))||{})};PROJECTS=(await idb.get('projects'))||[];DEFS=(await idb.get('defs'))||DEFAULT_DEFS.map(d=>({...d}));}
  catch(e){list.innerHTML='<div class="empty"><strong>Хранилището на браузъра е недостъпно</strong><span>Провери дали не си в частен режим (Private) на Safari.</span></div>';return;}
  $('#langTxt').textContent=LANG==='en'?'БГ':'EN';$('#langBtn').setAttribute('aria-label',LANG==='en'?'Превключи на български':'Switch to English');
  $('#langBtn').onclick=()=>{try{localStorage.setItem('lang',LANG==='en'?'bg':'en')}catch(_){}location.reload();};
@@ -1672,6 +1903,8 @@ function openMergePreview(pkg){
  trTree(document.body);
  $('#topArt').innerHTML=ILL_HERO.replace('<svg class="ill"','<svg class="ill" preserveAspectRatio="xMidYMax meet"');
  rebuild();
+ try{const pj=localStorage.getItem('proj');if(pj)PROJ=liveProjects().find(p=>p.id===pj)||null;}catch(e){}
+ renderProjHead();
  try{const s=localStorage.getItem('q');if(s)q.value=s;const o=localStorage.getItem('op');if(o)opF=o;const f=JSON.parse(localStorage.getItem('flt')||'null');if(f)FLT={dist:0,reg:[],role:[],place:[],obl:[],f:{},...f,dist:0};}catch(e){}
  search();
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
