@@ -508,7 +508,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='29';
+const APP_VER='30';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -663,7 +663,10 @@ const ROLE_NAME={host:['Домакин','Host'],guest:['Гост','Guest'],solo:
 const roleName=k=>ROLE_NAME[k][LANG==='en'?1:0];
 // phone numbers inside any text become tap-to-call links
 const RX_PHONE=/(?:\+?359|\b0)[\s\-\/]?\d(?:[\s\-\/]?\d){6,9}\b/g;
-function linkPhones(v){let out='',last=0;v.replace(RX_PHONE,(m,i)=>{out+=hl(v.slice(last,i))+`<a href="tel:${esc(m.replace(/[^\d+]/g,''))}">${esc(m)}</a>`;last=i+m.length;return m;});return out+hl(v.slice(last));}
+// phone numbers and e-mail addresses inside any text become links
+const RX_LINKS=new RegExp('([\\w.+-]+@[\\w-]+(?:\\.[\\w-]+)+)|('+RX_PHONE.source+')','g');
+function linkPhones(v){let out='',last=0;v.replace(RX_LINKS,(m,em,ph,i)=>{const at=typeof i==='number'?i:arguments.length;out+=hl(v.slice(last,at));
+  out+=em?`<a href="mailto:${esc(m)}">${esc(m)}</a>`:`<a href="tel:${esc(m.replace(/[^\d+]/g,''))}">${esc(m)}</a>`;last=at+m.length;return m;});return out+hl(v.slice(last));}
 function fmtVal(d,v){v=String(v);
  if(d.type==='phone'){const tel=v.replace(/[^\d+]/g,'');return tel.length>=6?`<a href="tel:${esc(tel)}">${hl(v)}</a>`:hl(v);}
  return linkPhones(v);}
