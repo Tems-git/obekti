@@ -153,6 +153,11 @@ main{padding-top:14px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)
 .t{display:flex;align-items:center;gap:10px;min-width:0}
 .id{font:600 13.5px/1 var(--mono);letter-spacing:.02em;padding:6px 8px 6px 7px;border-radius:7px;background:var(--fg);color:var(--surface);flex:none;display:inline-flex;align-items:center;gap:5px}
 .nm{font-weight:600;font-size:17px;letter-spacing:-.005em;min-width:0;overflow-wrap:anywhere;flex:1}
+.acclock{display:inline-flex;vertical-align:-2px;margin-left:6px;color:#d93025}
+.colo{display:flex;align-items:flex-start;gap:6px;font-size:12.5px;line-height:1.35;color:var(--muted);margin-top:-2px}
+.colo svg{flex:none;color:var(--accent);margin-top:1px}
+.colo b{font-weight:600;color:var(--fg)}
+.colo i{font-style:normal;color:var(--fg)}
 .more-btn{flex:none;width:32px;height:32px;margin:-4px -6px -4px 0;border:0;background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;display:grid;place-items:center}
 .more-btn:hover{background:var(--surface-2)}
 .ad{font-size:14.5px;line-height:1.45;overflow-wrap:anywhere}
@@ -493,7 +498,7 @@ if(LANG==='en'){
   .observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 
-const APP_VER='25';
+const APP_VER='26';
 /* ====================== helpers ====================== */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -601,16 +606,22 @@ function card(k){
  const it=res[k],g=G[it.g],i=sel.get(it.g)??it.best,r=L[i],ll=fx(r.lat)+','+fx(r.lon);
  const [ad,note]=r.addr?splitAddr(r.addr):['',''];const o=origin();
  const isOrigin=near&&near.type==='site'&&g.some(p=>L[p].k===near.k);
- let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t"><span class="id">${esc(r.id)}</span><span class="nm">${hl(r.name||'')}</span>`+
+ const xs0=r.x||{},acc=defBy(RX_ACCESS).map(d=>String(xs0[d.id]??'').trim()).find(Boolean);
+ const lock=acc?`<span class="acclock" title="${esc((LANG==='en'?'Access: ':'Достъп: ')+acc)}" role="img" aria-label="${esc((LANG==='en'?'Access required: ':'Нужен достъп: ')+acc)}">${IC_LOCK}</span>`:'';
+ let h=`<article class="c${isOrigin?' origin':''}" data-k="${k}"><div class="t"><span class="id">${esc(r.id)}</span><span class="nm">${hl(r.name||'')}${lock}</span>`+
   `<button class="more-btn" type="button" data-act="${esc(r.k)}" aria-label="Действия">${IC.dots}</button></div>`;
+ const hostV=defBy(RX_HOST).map(d=>String(xs0[d.id]??'').trim()).find(Boolean)||'',guests=defBy(RX_GUEST).map(d=>String(xs0[d.id]??'').trim()).filter(Boolean);
+ if(guests.length)h+=`<div class="colo" data-raw>${IC_COLO}<span><b>${LANG==='en'?'Colocation':'Колокация'}</b>${hostV?` · ${LANG==='en'?'host':'домакин'} <i>${hl(hostV)}</i>`:''} · ${LANG==='en'?(guests.length>1?'guests':'guest'):(guests.length>1?'гости':'гост')} <i>${guests.map(hl).join(', ')}</i></span></div>`;
+ else if(hostV)h+=`<div class="colo" data-raw>${IC_COLO}<span>${LANG==='en'?'Host':'Домакин'} <i>${hl(hostV)}</i></span></div>`;
  if(g.length>1)h+=`<div class="opts" role="group" aria-label="Опции"><span class="lbl">Опция</span>`+
    g.map(p=>`<button class="opt${it.hits&&it.hits.has(p)?' hit':''}" type="button" data-p="${p}" aria-pressed="${p===i}">${L[p].opt||1}</button>`).join('')+`</div>`;
  if(ad)h+=`<div class="ad">${hl(ad)}${note?`<span class="note">${hl(note)}</span>`:''}</div>`;
  const xs=r.x||{},LD=liveDefs(),has=d=>String(xs[d.id]??'').trim()!=='';
- const tags=LD.filter(d=>d.badge&&has(d));
+ const coloIds=new Set([...defBy(RX_HOST),...defBy(RX_GUEST)].map(d=>d.id));
+ const tags=LD.filter(d=>d.badge&&has(d)&&!coloIds.has(d.id));
  if(tags.length)h+=`<div class="tags">${tags.map(d=>{const w=d.warn&&String(xs[d.id])!==String((d.opts||[])[0]??'');
    return `<span class="tag${w?' warn':''}" title="${esc(d.name)}">${w?IC.key:''}${hl(d.type==='yesno'?d.name+': '+xs[d.id]:xs[d.id])}</span>`;}).join('')}</div>`;
- const det=LD.filter(d=>!d.badge&&has(d));
+ const det=LD.filter(d=>!d.badge&&has(d)&&!coloIds.has(d.id));
  if(det.length)h+=`<details class="det"><summary>Детайли · ${det.length}</summary><dl>${det.map(d=>`<dt>${esc(d.name)}</dt><dd>${fmtVal(d,xs[d.id])}</dd>`).join('')}</dl></details>`;
  h+=`<div class="meta">${r.own?`<span class="own ${OPCLS.get(ownerOf(r))||'p5'}">${hl(r.own)}</span>`:''}<span class="co">${ll}</span>`+
    (o?(isOrigin?'<span class="dist origin">избран</span>':`<span class="dist">${near.type==='me'?`<svg class="dirx" width="11" height="11" viewBox="0 0 24 24" style="transform:rotate(${Math.round(brg(o,r))}deg)" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4z" fill="currentColor"/></svg>`:''}${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</span>`):'')+
@@ -620,9 +631,18 @@ function card(k){
    `<button class="cp" data-ll="${ll}" type="button" aria-label="Копирай координатите">${IC.cp}</button></div></article>`;
  return h;
 }
+/* special columns, recognised by their header: access (red lock), host and guests (colocation line) */
+const RX_ACCESS=/^(site\s*)?access$|^достъп$/i, RX_HOST=/^(site\s*)?host$|^домакин$/i,
+ RX_GUEST=/^((first|second|third|fourth|fifth|1st|2nd|3rd|4th|5th)\s+)?guest(\s*\d+)?$|^(първи|втори|трети|четвърти)?\s*гост(\s*\d+)?$/i;
+const defBy=re=>liveDefs().filter(d=>re.test(d.name.trim()));
+// phone numbers inside any text become tap-to-call links
+const RX_PHONE=/(?:\+?359|\b0)[\s\-\/]?\d(?:[\s\-\/]?\d){6,9}\b/g;
+function linkPhones(v){let out='',last=0;v.replace(RX_PHONE,(m,i)=>{out+=hl(v.slice(last,i))+`<a href="tel:${esc(m.replace(/[^\d+]/g,''))}">${esc(m)}</a>`;last=i+m.length;return m;});return out+hl(v.slice(last));}
 function fmtVal(d,v){v=String(v);
  if(d.type==='phone'){const tel=v.replace(/[^\d+]/g,'');return tel.length>=6?`<a href="tel:${esc(tel)}">${hl(v)}</a>`:hl(v);}
- return hl(v);}
+ return linkPhones(v);}
+const IC_LOCK='<svg class="lockic" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2.5" fill="currentColor"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.7" fill="#fff"/></svg>';
+const IC_COLO='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 21 11 9M15.5 21 13 9M9.6 16h4.8"/><path d="M12 9V5"/><path d="M6.5 4.5a7 7 0 0 0 0 9M17.5 4.5a7 7 0 0 1 0 9"/></svg>';
 const ILL_HERO=`<svg class="ill" viewBox="0 0 360 196" role="img" aria-label="Базова станция с антени и радиорелейна връзка"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--il-sky1)"/><stop offset="1" style="stop-color:var(--il-sky2)"/></linearGradient></defs>
 <rect width="360" height="196" fill="url(#sky)"/>
 <circle class="sun" cx="58" cy="46" r="15" style="fill:var(--il-sun)" opacity=".9"/>
@@ -754,7 +774,8 @@ async function openMap(){
 }
 function closeMap(){$('#mapView').hidden=true;document.body.style.overflow='';}
 function popupHtml(r,o){const ll=fx(r.lat)+','+fx(r.lon);const [ad]=r.addr?splitAddr(r.addr):[''];
- return `<div class="pp"><div><b class="pid">${esc(r.id)}</b><span class="pn">${esc(r.name||'')}</span></div>${ad?`<div class="pa">${esc(ad)}</div>`:''}`+
+ const acc=defBy(RX_ACCESS).map(d=>String((r.x||{})[d.id]??'').trim()).find(Boolean);
+ return `<div class="pp"><div><b class="pid">${esc(r.id)}</b><span class="pn">${esc(r.name||'')}</span>${acc?`<span class="acclock">${IC_LOCK}</span>`:''}</div>${ad?`<div class="pa">${esc(ad)}</div>`:''}`+
   (o?`<div class="pd">${fmtKm(km(o,r))}${near.type==='me'?' '+dir(o,r):''}</div>`:'')+
   `<div class="pb"><a class="g" href="https://www.google.com/maps/search/?api=1&query=${ll}" target="_blank" rel="noopener">Google Maps</a><a class="w" href="${wazeHref(ll)}" ${IS_ANDROID?'':'target="_blank" rel="noopener"'}>Waze</a></div></div>`;}
 function drawMap(fit){
